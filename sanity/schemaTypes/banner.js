@@ -24,6 +24,12 @@ export const banner = {
       type: 'string',
     },
     {
+      name: 'link',
+      title: 'Target Link / Search Query',
+      type: 'string',
+      description: 'e.g. /search?q=jeans or /menspage',
+    },
+    {
       name: 'page',
       title: 'Target Page',
       type: 'string',

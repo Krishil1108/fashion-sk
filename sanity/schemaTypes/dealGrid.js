@@ -19,6 +19,12 @@ export const dealGrid = {
       validation: (Rule) => Rule.required(),
     },
     {
+      name: 'link',
+      title: 'Target Link / Search Query',
+      type: 'string',
+      description: 'e.g. /search?q=jeans or /menspage',
+    },
+    {
       name: 'section',
       title: 'Target Section',
       type: 'string',
