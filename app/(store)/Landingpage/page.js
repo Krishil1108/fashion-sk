@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { client, urlFor } from '../../../sanity/client';
 import '../../styles/header.css';
 
@@ -84,6 +85,8 @@ const fallbackGrids = {
   ]
 };
 
+const targetLinks = ['/menspage', '/womenspage', '/kidspage', '/homeLiving', '/beautypage', '/studiopage'];
+
 export default function Landingpage() {
   const [banners, setBanners] = useState([]);
   const [grids, setGrids] = useState({});
@@ -143,7 +146,9 @@ export default function Landingpage() {
     const items = grids[sectionKey] || [];
     return items.map((el, index) => (
       <div key={index}>
-        <img src={el.img} alt={`grid-${sectionKey}-${index}`} />
+        <Link href={targetLinks[index % targetLinks.length]}>
+          <img src={el.img} alt={`grid-${sectionKey}-${index}`} style={{ cursor: 'pointer' }} />
+        </Link>
       </div>
     ));
   };
@@ -173,7 +178,9 @@ export default function Landingpage() {
               key={idx} 
               style={{ width: `${100 / (banners.length || 1)}%` }}
             >
-              <img src={slide.img} alt={`Slide ${idx + 1}`} />
+              <Link href={targetLinks[idx % targetLinks.length]}>
+                <img src={slide.img} alt={`Slide ${idx + 1}`} style={{ cursor: 'pointer' }} />
+              </Link>
             </div>
           ))}
         </div>
