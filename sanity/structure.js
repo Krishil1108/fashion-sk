@@ -29,6 +29,27 @@ export const myStructure = (S) =>
                     .title("Home & Living Products")
                     .filter('_type == "product" && category == "home_living"')
                 ),
+              S.listItem()
+                .title("Kids Products")
+                .child(
+                  S.documentList()
+                    .title("Kids Products")
+                    .filter('_type == "product" && category == "kids"')
+                ),
+              S.listItem()
+                .title("Beauty & Personal Care")
+                .child(
+                  S.documentList()
+                    .title("Beauty & Personal Care")
+                    .filter('_type == "product" && category == "beauty"')
+                ),
+              S.listItem()
+                .title("Studio Fashion Feed")
+                .child(
+                  S.documentList()
+                    .title("Studio Fashion Feed")
+                    .filter('_type == "product" && category == "studio"')
+                ),
               S.divider(),
               S.listItem()
                 .title('All Products')
