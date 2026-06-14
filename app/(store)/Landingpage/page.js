@@ -52,8 +52,8 @@ export default function Landingpage() {
     if (items.length === 0) return null;
     return (
       <>
-        <h1>{getSectionTitle(sectionKey)}</h1>
-        <div id={sectionKey}>
+        <h1 className="brand_heading">{getSectionTitle(sectionKey)}</h1>
+        <div id={sectionKey} className="promo-grid container">
           {items.map((el, index) => (
             <div key={index}>
               <Link href={el.link || '/search?q=fashion'}>

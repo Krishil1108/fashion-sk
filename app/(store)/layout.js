@@ -116,7 +116,7 @@ export default function StoreLayout({ children }) {
       </header>
 
       {/* Main Page Content */}
-      <main style={{ minHeight: 'calc(100vh - 80px)', marginTop: '80px', padding: '20px 40px', backgroundColor: 'var(--bgColor)' }}>
+      <main className="main-content">
         {children}
       </main>
 

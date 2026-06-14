@@ -232,7 +232,7 @@ export default function ProductListPage({ category, title, fallbackProducts, sea
       </h1>
 
       {/* PRODUCTS GRID */}
-      <div id="container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '30px', width: '100%', marginTop: '0' }}>
+      <div id="container" className="products-grid">
         {filteredProducts.map((elem, idx) => (
           <div className="product-card" key={idx} style={{ 
             backgroundColor: 'var(--cardBg)', 
@@ -257,7 +257,7 @@ export default function ProductListPage({ category, title, fallbackProducts, sea
           }}
           >
             {/* IMAGE WRAPPER */}
-            <div style={{ position: 'relative', overflow: 'hidden', height: '280px' }}>
+            <div className="product-image-wrapper" style={{ position: 'relative', overflow: 'hidden' }}>
               <img 
                 className="product-img"
                 src={elem.image_url} 
