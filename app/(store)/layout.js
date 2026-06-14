@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import SearchBar from '../components/SearchBar';
 import { useRouter } from 'next/navigation';
 import '../styles/style.css';
 import '../styles/navbar.css';
@@ -69,10 +70,7 @@ export default function StoreLayout({ children }) {
             <Link href="/studiopage">studio<span style={{color: 'var(--accentColor)', fontSize: '10px', fontWeight: '800', marginLeft: '4px', textTransform: 'uppercase'}}>new</span></Link>
           </li>
         </ul>
-        <div id="search">
-          <input type="text" id="search_bar" placeholder="Search for products, brands and more" />
-          <i className="fa-solid fa-magnifying-glass" id="search_icon"></i>
-        </div>
+        <SearchBar />
         <div id="right_icon">
           <div id="reggDropdown">
             <div id="drop">

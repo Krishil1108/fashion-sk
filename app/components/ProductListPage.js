@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { client, urlFor } from '../../sanity/client';
 
-export default function ProductListPage({ category, title, fallbackProducts }) {
+export default function ProductListPage({ category, title, fallbackProducts, searchQuery }) {
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [brands, setBrands] = useState([]);
@@ -16,10 +16,17 @@ export default function ProductListPage({ category, title, fallbackProducts }) {
   useEffect(() => {
     async function fetchProducts() {
       try {
-        const fetched = await client.fetch(
-          `*[_type == "product" && category == $category]`,
-          { category }
-        );
+        let queryStr = '';
+        let params = {};
+        if (searchQuery) {
+          queryStr = `*[_type == "product" && (title match $searchQuery || brand match $searchQuery || category match $searchQuery)]`;
+          params = { searchQuery: `${searchQuery}*` };
+        } else {
+          queryStr = `*[_type == "product" && category == $category]`;
+          params = { category };
+        }
+        
+        const fetched = await client.fetch(queryStr, params);
         if (fetched && fetched.length > 0) {
           const formatted = fetched.map(item => ({
             image_url: urlFor(item.image).url(),
@@ -47,7 +54,7 @@ export default function ProductListPage({ category, title, fallbackProducts }) {
       }
     }
     fetchProducts();
-  }, [category, fallbackProducts]);
+  }, [category, fallbackProducts, searchQuery]);
 
   // Load wishlist map
   useEffect(() => {

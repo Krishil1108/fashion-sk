@@ -85,7 +85,22 @@ const fallbackGrids = {
   ]
 };
 
-const targetLinks = ['/menspage', '/womenspage', '/kidspage', '/homeLiving', '/beautypage', '/studiopage'];
+const getSearchUrl = (url) => {
+  if (!url) return '/search?q=fashion';
+  const lowercaseUrl = url.toLowerCase();
+  if (lowercaseUrl.includes('jeans') || lowercaseUrl.includes('denim')) return '/search?q=jeans';
+  if (lowercaseUrl.includes('shoes') || lowercaseUrl.includes('sneaker') || lowercaseUrl.includes('crocs') || lowercaseUrl.includes('heels') || lowercaseUrl.includes('puma') || lowercaseUrl.includes('nike')) return '/search?q=shoes';
+  if (lowercaseUrl.includes('kurta') || lowercaseUrl.includes('anouk')) return '/search?q=kurta';
+  if (lowercaseUrl.includes('shirt') || lowercaseUrl.includes('tee') || lowercaseUrl.includes('top')) return '/search?q=shirt';
+  if (lowercaseUrl.includes('dress')) return '/search?q=dress';
+  if (lowercaseUrl.includes('saree')) return '/search?q=saree';
+  if (lowercaseUrl.includes('trouser')) return '/search?q=trouser';
+  if (lowercaseUrl.includes('beauty') || lowercaseUrl.includes('bath') || lowercaseUrl.includes('cosmetics')) return '/beautypage';
+  if (lowercaseUrl.includes('kids')) return '/kidspage';
+  if (lowercaseUrl.includes('men')) return '/menspage';
+  if (lowercaseUrl.includes('women')) return '/womenspage';
+  return '/search?q=fashion';
+};
 
 export default function Landingpage() {
   const [banners, setBanners] = useState([]);
@@ -146,7 +161,7 @@ export default function Landingpage() {
     const items = grids[sectionKey] || [];
     return items.map((el, index) => (
       <div key={index}>
-        <Link href={targetLinks[index % targetLinks.length]}>
+        <Link href={getSearchUrl(el.img)}>
           <img src={el.img} alt={`grid-${sectionKey}-${index}`} style={{ cursor: 'pointer' }} />
         </Link>
       </div>
@@ -178,7 +193,7 @@ export default function Landingpage() {
               key={idx} 
               style={{ width: `${100 / (banners.length || 1)}%` }}
             >
-              <Link href={targetLinks[idx % targetLinks.length]}>
+              <Link href={getSearchUrl(slide.img)}>
                 <img src={slide.img} alt={`Slide ${idx + 1}`} style={{ cursor: 'pointer' }} />
               </Link>
             </div>
