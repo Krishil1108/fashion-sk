@@ -57,16 +57,16 @@ export default function StoreLayout({ children }) {
             <Link href="/womenspage">women</Link>
           </li>
           <li>
-            <a href="#">kids</a>
+            <Link href="/kidspage">kids</Link>
           </li>
           <li>
             <Link href="/homeLiving">home & living</Link>
           </li>
           <li>
-            <a href="#">beauty</a>
+            <Link href="/beautypage">beauty</Link>
           </li>
           <li id="studio">
-            <a href="#">studio</a><span>new</span>
+            <Link href="/studiopage">studio<span style={{color: 'var(--accentColor)', fontSize: '10px', fontWeight: '800', marginLeft: '4px', textTransform: 'uppercase'}}>new</span></Link>
           </li>
         </ul>
         <div id="search">
@@ -103,10 +103,10 @@ export default function StoreLayout({ children }) {
             <div className="top">
               <Link href="/menspage" onClick={() => setShowDropdown(false)}>men</Link>
               <Link href="/womenspage" onClick={() => setShowDropdown(false)}>women</Link>
-              <a href="#" onClick={() => setShowDropdown(false)}>kids</a>
+              <Link href="/kidspage" onClick={() => setShowDropdown(false)}>kids</Link>
               <Link href="/homeLiving" onClick={() => setShowDropdown(false)}>home & living</Link>
-              <a href="#" onClick={() => setShowDropdown(false)}>beauty</a>
-              <a href="#" onClick={() => setShowDropdown(false)}>studio</a>
+              <Link href="/beautypage" onClick={() => setShowDropdown(false)}>beauty</Link>
+              <Link href="/studiopage" onClick={() => setShowDropdown(false)}>studio</Link>
             </div>
             <div className="bottom">
               <i className="fa-regular fa-user fa_user" onClick={() => { router.push('/Profile/signup'); setShowDropdown(false); }}></i>
