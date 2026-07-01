@@ -2,8 +2,6 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import '../../../styles/profile.css';
-
 export default function ProfilePage() {
   const router = useRouter();
   const [email, setEmail] = useState('');

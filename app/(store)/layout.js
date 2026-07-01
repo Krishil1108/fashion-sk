@@ -5,7 +5,6 @@ import Link from 'next/link';
 import SearchBar from '../components/SearchBar';
 import { useRouter } from 'next/navigation';
 import '../styles/style.css';
-import '../styles/navbar.css';
 
 export default function StoreLayout({ children }) {
   const router = useRouter();
@@ -67,7 +66,7 @@ export default function StoreLayout({ children }) {
             <Link href="/beautypage">beauty</Link>
           </li>
           <li id="studio">
-            <Link href="/studiopage">studio<span style={{color: 'var(--accentColor)', fontSize: '10px', fontWeight: '800', marginLeft: '4px', textTransform: 'uppercase'}}>new</span></Link>
+            <Link href="/studiopage">studio<span>new</span></Link>
           </li>
         </ul>
         <SearchBar />

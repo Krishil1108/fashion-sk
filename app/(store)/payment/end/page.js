@@ -2,8 +2,6 @@
 
 import React from 'react';
 import Link from 'next/link';
-import '../../../styles/end.css';
-
 export default function OrderSuccessPage() {
   return (
     <div style={{ padding: '40px 30px', textAlign: 'center', maxWidth: '500px', margin: '60px auto', borderRadius: 'var(--borderRadius)', background: 'var(--cardBg)', boxShadow: 'var(--shadowLight)' }}>

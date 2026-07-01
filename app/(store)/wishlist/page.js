@@ -1,8 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import '../../styles/wishlist.css';
-
 export default function WishlistPage() {
   const [wishlist, setWishlist] = useState([]);
 

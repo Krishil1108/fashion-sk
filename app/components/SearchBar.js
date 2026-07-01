@@ -65,7 +65,6 @@ export default function SearchBar() {
     <div 
       id="search" 
       ref={dropdownRef}
-      style={{ position: 'relative', width: '100%', maxWidth: '500px', display: 'flex', alignItems: 'center' }}
     >
       <input 
         type="text" 
@@ -76,29 +75,10 @@ export default function SearchBar() {
         onFocus={() => setIsFocused(true)}
         onKeyDown={handleKeyDown}
         autoComplete="off"
-        style={{
-          width: '100%',
-          padding: '12px 16px 12px 40px',
-          border: '1px solid #f5f5f6',
-          borderRadius: '4px',
-          backgroundColor: '#f5f5f6',
-          fontSize: '14px',
-          outline: 'none',
-          color: '#282c3f',
-          transition: 'all 0.3s ease'
-        }}
-        onMouseEnter={(e) => e.target.style.backgroundColor = '#ffffff'}
-        onMouseLeave={(e) => { if(!isFocused) e.target.style.backgroundColor = '#f5f5f6'; }}
       />
       <i 
         className="fa-solid fa-magnifying-glass" 
         id="search_icon"
-        style={{
-          position: 'absolute',
-          left: '12px',
-          color: '#696e79',
-          fontSize: '14px'
-        }}
       ></i>
 
       {/* DROPDOWN SUGGESTIONS */}
@@ -108,16 +88,16 @@ export default function SearchBar() {
           top: '50px',
           left: '0',
           width: '100%',
-          backgroundColor: '#ffffff',
-          borderRadius: '4px',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+          backgroundColor: 'var(--bg-primary)',
+          borderRadius: 'var(--radius-md)',
+          boxShadow: 'var(--shadow-lg)',
           zIndex: 1000,
           maxHeight: '400px',
           overflowY: 'auto',
-          border: '1px solid #eaeaec'
+          border: '1px solid var(--border-color)'
         }}>
           {isLoading ? (
-            <div style={{ padding: '15px', textAlign: 'center', color: '#696e79', fontSize: '13px' }}>
+            <div style={{ padding: '15px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '13px' }}>
               <i className="fa-solid fa-spinner fa-spin" style={{ marginRight: '8px' }}></i> Searching...
             </div>
           ) : suggestions.length > 0 ? (
@@ -130,12 +110,12 @@ export default function SearchBar() {
                     display: 'flex',
                     alignItems: 'center',
                     padding: '12px 15px',
-                    borderBottom: '1px solid #f5f5f6',
+                    borderBottom: '1px solid var(--border-light)',
                     cursor: 'pointer',
-                    transition: 'background-color 0.2s'
+                    transition: 'background-color var(--transition-fast)'
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f5f5f6'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ffffff'}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-secondary)'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-primary)'}
                 >
                   {item.image && (
                     <img 
@@ -145,8 +125,8 @@ export default function SearchBar() {
                     />
                   )}
                   <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                    <span style={{ fontSize: '14px', fontWeight: '700', color: '#282c3f', marginBottom: '2px' }}>{item.brand}</span>
-                    <span style={{ fontSize: '12px', color: '#7e818c', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.title}</span>
+                    <span style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '2px' }}>{item.brand}</span>
+                    <span style={{ fontSize: '12px', color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.title}</span>
                   </div>
                 </li>
               ))}
@@ -158,18 +138,16 @@ export default function SearchBar() {
                   textAlign: 'center',
                   fontSize: '13px',
                   fontWeight: '700',
-                  color: 'var(--accentColor)',
+                  color: 'var(--accent-color)',
                   cursor: 'pointer',
-                  backgroundColor: '#fffafb'
+                  backgroundColor: 'var(--accent-light)'
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#ffeff1'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#fffafb'}
               >
                 See all results for "{query}"
               </li>
             </ul>
           ) : (
-            <div style={{ padding: '15px', textAlign: 'center', color: '#696e79', fontSize: '13px' }}>
+            <div style={{ padding: '15px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '13px' }}>
               No products found for "{query}"
             </div>
           )}

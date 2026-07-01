@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { client, urlFor } from '../../../sanity/client';
-import '../../styles/header.css';
 
 export default function Landingpage() {
   const [banners, setBanners] = useState([]);
@@ -51,18 +50,18 @@ export default function Landingpage() {
     const items = grids[sectionKey] || [];
     if (items.length === 0) return null;
     return (
-      <>
+      <div key={sectionKey}>
         <h1 className="brand_heading">{getSectionTitle(sectionKey)}</h1>
-        <div id={sectionKey} className="promo-grid container">
+        <div id={sectionKey} className="promo-grid">
           {items.map((el, index) => (
-            <div key={index}>
+            <div key={index} className="grid-item">
               <Link href={el.link || '/search?q=fashion'}>
-                <img src={el.img} alt={`grid-${sectionKey}-${index}`} style={{ cursor: 'pointer' }} />
+                <img src={el.img} alt={`grid-${sectionKey}-${index}`} />
               </Link>
             </div>
           ))}
         </div>
-      </>
+      </div>
     );
   };
 
@@ -83,21 +82,14 @@ export default function Landingpage() {
   };
 
   return (
-    <div style={{ marginTop: '0' }}>
-      {/* FLAT DISCOUNT FLOATING PANEL */}
-      <div id="flatdiscount">
-        <i id="sidePanel" className="fa-solid fa-caret-left"></i>
-        <h1>FLAT ₹300 OFF</h1>
-      </div>
-
+    <div className="landing-container">
       {/* CAROUSEL SLIDER */}
-      <div className="slider" style={{ marginTop: '10px' }}>
+      <div className="slider">
         <div 
           id="slides" 
           className="slides" 
           style={{ 
             transform: `translateX(-${currentSlide * (100 / (banners.length || 1))}%)`,
-            transition: 'transform 800ms ease-in-out',
             width: `${(banners.length || 1) * 100}%`
           }}
         >
@@ -108,45 +100,37 @@ export default function Landingpage() {
               style={{ width: `${100 / (banners.length || 1)}%` }}
             >
               <Link href={slide.link || '/search?q=fashion'}>
-                <img src={slide.img} alt={`Slide ${idx + 1}`} style={{ cursor: 'pointer' }} />
+                <img src={slide.img} alt={`Slide ${idx + 1}`} />
               </Link>
             </div>
           ))}
         </div>
 
         {/* manual navigation */}
-        <div className="navigation-manual" style={{ position: 'absolute', bottom: '15px', left: '0', right: '0', display: 'flex', justifyContent: 'center' }}>
+        <div className="navigation-manual">
           {banners.map((_, idx) => (
-            <label 
+            <div
               key={idx} 
-              className="manual-btn" 
+              className={`manual-btn ${currentSlide === idx ? 'active' : ''}`} 
               onClick={() => setCurrentSlide(idx)}
-              style={{ 
-                background: currentSlide === idx ? '#505050' : '#dfe0e3',
-                margin: '0 5px',
-                width: '12px',
-                height: '12px',
-                borderRadius: '50%',
-                display: 'inline-block',
-                cursor: 'pointer',
-                border: '1px solid #aaa'
-              }}
             />
           ))}
         </div>
       </div>
 
       {/* PROMO SECTIONS GRIDS */}
-      {renderGrid('deals')}
-      {renderGrid('best')}
-      {renderGrid('top')}
-      {renderGrid('categories')}
-      {renderGrid('dealsTop')}
-      {renderGrid('unmissable')}
-      {renderGrid('colours')}
-      {renderGrid('topInfluencers')}
-      {renderGrid('budget')}
-      {renderGrid('trending')}
+      <div className="promotions-container" style={{ padding: '0 2rem' }}>
+        {renderGrid('deals')}
+        {renderGrid('best')}
+        {renderGrid('top')}
+        {renderGrid('categories')}
+        {renderGrid('dealsTop')}
+        {renderGrid('unmissable')}
+        {renderGrid('colours')}
+        {renderGrid('topInfluencers')}
+        {renderGrid('budget')}
+        {renderGrid('trending')}
+      </div>
     </div>
   );
 }

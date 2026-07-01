@@ -2,8 +2,6 @@
 
 import React from 'react';
 import ProductListPage from '../../components/ProductListPage';
-import '../../styles/womenstyle.css';
-
 const fallbackWomensProducts = [
   {
     image_url: "https://bit.ly/3uHGEnN",

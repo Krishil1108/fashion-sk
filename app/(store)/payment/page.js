@@ -2,8 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import '../../styles/payment.css';
-
 export default function PaymentPage() {
   const router = useRouter();
   const [payableAmount, setPayableAmount] = useState(0);

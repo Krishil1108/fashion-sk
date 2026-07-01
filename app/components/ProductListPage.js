@@ -124,44 +124,25 @@ export default function ProductListPage({ category, title, fallbackProducts, sea
     // Update button text temporarily
     const oldText = e.target.innerText;
     e.target.innerText = "ADDED TO BAG ✓";
-    e.target.style.backgroundColor = "var(--successColor)";
+    e.target.style.backgroundColor = "var(--success-color)";
+    e.target.style.color = "white";
     setTimeout(() => {
       e.target.innerText = oldText;
-      e.target.style.backgroundColor = "var(--accentColor)";
+      e.target.style.backgroundColor = "";
+      e.target.style.color = "";
     }, 1500);
   };
 
   return (
-    <div style={{ marginTop: '0', padding: '0' }}>
+    <div>
       {/* FILTER & SORT PANEL */}
-      <div className="filter-sort-panel" style={{ 
-        display: 'flex', 
-        flexWrap: 'wrap',
-        gap: '20px', 
-        marginBottom: '30px', 
-        padding: '15px 25px', 
-        backgroundColor: 'var(--cardBg)',
-        borderRadius: '8px',
-        boxShadow: 'var(--shadowLight)',
-        alignItems: 'center'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <label style={{ fontSize: '12px', color: 'var(--textMuted)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Sort Name:</label>
+      <div className="filter-sort-panel">
+        <div className="filter-group">
+          <label className="filter-label">Sort Name:</label>
           <select 
-            id="nameSort" 
+            className="filter-select"
             value={nameSort} 
             onChange={(e) => { setNameSort(e.target.value); setPriceSort(''); }}
-            style={{ 
-              padding: '8px 12px', 
-              borderRadius: '4px', 
-              border: '1px solid var(--borderColor)', 
-              fontSize: '13px',
-              color: 'var(--textColor)',
-              backgroundColor: '#ffffff',
-              outline: 'none',
-              cursor: 'pointer',
-              fontWeight: '500'
-            }}
           >
             <option value="">Default</option>
             <option value="asc">A - Z</option>
@@ -169,23 +150,12 @@ export default function ProductListPage({ category, title, fallbackProducts, sea
           </select>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <label style={{ fontSize: '12px', color: 'var(--textMuted)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Sort Price:</label>
+        <div className="filter-group">
+          <label className="filter-label">Sort Price:</label>
           <select 
-            id="priceSort" 
+            className="filter-select"
             value={priceSort} 
             onChange={(e) => { setPriceSort(e.target.value); setNameSort(''); }}
-            style={{ 
-              padding: '8px 12px', 
-              borderRadius: '4px', 
-              border: '1px solid var(--borderColor)', 
-              fontSize: '13px',
-              color: 'var(--textColor)',
-              backgroundColor: '#ffffff',
-              outline: 'none',
-              cursor: 'pointer',
-              fontWeight: '500'
-            }}
           >
             <option value="">Default</option>
             <option value="lth">Low to High</option>
@@ -193,23 +163,12 @@ export default function ProductListPage({ category, title, fallbackProducts, sea
           </select>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <label style={{ fontSize: '12px', color: 'var(--textMuted)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Brand:</label>
+        <div className="filter-group">
+          <label className="filter-label">Brand:</label>
           <select 
-            id="brandFilter" 
+            className="filter-select"
             value={selectedBrand} 
             onChange={(e) => setSelectedBrand(e.target.value)}
-            style={{ 
-              padding: '8px 12px', 
-              borderRadius: '4px', 
-              border: '1px solid var(--borderColor)', 
-              fontSize: '13px',
-              color: 'var(--textColor)',
-              backgroundColor: '#ffffff',
-              outline: 'none',
-              cursor: 'pointer',
-              fontWeight: '500'
-            }}
           >
             <option value="all">All Brands</option>
             {brands.map((brand, idx) => (
@@ -219,50 +178,20 @@ export default function ProductListPage({ category, title, fallbackProducts, sea
         </div>
       </div>
 
-      <h1 style={{ 
-        margin: '0 0 25px 0', 
-        textTransform: 'uppercase', 
-        letterSpacing: '1px', 
-        fontSize: '22px',
-        fontWeight: '800',
-        color: 'var(--primaryColor)',
-        fontFamily: 'var(--secondaryFont)'
-      }}>
-        {title} <span style={{ fontSize: '14px', color: 'var(--textMuted)', fontWeight: '500', textTransform: 'lowercase' }}>({filteredProducts.length} items found)</span>
+      <h1 className="brand_heading" style={{ textAlign: 'left', margin: '2rem 0' }}>
+        {title} <span style={{ fontSize: '14px', color: 'var(--text-muted)', fontWeight: '500', textTransform: 'lowercase' }}>({filteredProducts.length} items found)</span>
       </h1>
 
       {/* PRODUCTS GRID */}
-      <div id="container" className="products-grid">
+      <div className="products-grid">
         {filteredProducts.map((elem, idx) => (
-          <div className="product-card" key={idx} style={{ 
-            backgroundColor: 'var(--cardBg)', 
-            borderRadius: 'var(--borderRadius)', 
-            overflow: 'hidden', 
-            cursor: 'pointer', 
-            boxShadow: 'var(--shadowLight)',
-            transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-            position: 'relative',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-            border: 'none'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-5px)';
-            e.currentTarget.style.boxShadow = 'var(--shadowHover)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = 'var(--shadowLight)';
-          }}
-          >
+          <div className="product-card" key={idx}>
             {/* IMAGE WRAPPER */}
-            <div className="product-image-wrapper" style={{ position: 'relative', overflow: 'hidden' }}>
+            <div className="product-image-wrapper">
               <img 
                 className="product-img"
                 src={elem.image_url} 
                 alt={elem.para} 
-                style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s ease' }} 
               />
               
               {/* WISHLIST OVERLAY */}
@@ -275,23 +204,25 @@ export default function ProductListPage({ category, title, fallbackProducts, sea
                   width: '36px',
                   height: '36px',
                   borderRadius: '50%',
-                  backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                  backgroundColor: 'var(--bg-glass)',
+                  backdropFilter: 'blur(4px)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                  boxShadow: 'var(--shadow-sm)',
                   cursor: 'pointer',
                   zIndex: 5,
-                  transition: 'background-color 0.2s, transform 0.2s'
+                  transition: 'transform var(--transition-bounce)'
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.15)'}
                 onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
               >
                 <i 
                   className={wishlistedMap[elem.image_url] ? "fa-solid fa-heart" : "fa-regular fa-heart"} 
                   style={{ 
-                    color: wishlistedMap[elem.image_url] ? 'var(--accentColor)' : '#7e818c', 
-                    fontSize: '16px' 
+                    color: wishlistedMap[elem.image_url] ? 'var(--accent-color)' : 'var(--text-secondary)', 
+                    fontSize: '16px',
+                    transition: 'color var(--transition-fast)'
                   }}
                 />
               </div>
@@ -302,15 +233,15 @@ export default function ProductListPage({ category, title, fallbackProducts, sea
                   position: 'absolute',
                   bottom: '12px',
                   left: '12px',
-                  backgroundColor: 'var(--accentColor)',
+                  backgroundColor: 'var(--accent-color)',
                   color: '#ffffff',
-                  padding: '4px 8px',
-                  borderRadius: '4px',
+                  padding: '4px 10px',
+                  borderRadius: 'var(--radius-full)',
                   fontSize: '11px',
                   fontWeight: '800',
                   letterSpacing: '0.5px',
                   zIndex: 5,
-                  boxShadow: '0 2px 6px rgba(255, 63, 108, 0.3)'
+                  boxShadow: '0 4px 8px rgba(255, 46, 99, 0.4)'
                 }}>
                   {elem.offer.replace(/[()]/g, '')}
                 </div>
@@ -318,59 +249,23 @@ export default function ProductListPage({ category, title, fallbackProducts, sea
             </div>
 
             {/* CONTENT BOX */}
-            <div style={{ padding: '20px', flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <div className="product-info">
               <div>
-                <h4 style={{ 
-                  fontFamily: 'var(--secondaryFont)', 
-                  fontSize: '14px', 
-                  fontWeight: '700', 
-                  color: 'var(--primaryColor)', 
-                  margin: '0 0 4px 0',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px'
-                }}>{elem.brand}</h4>
-                
-                <p style={{ 
-                  fontSize: '13px', 
-                  color: 'var(--textMuted)', 
-                  margin: '0 0 12px 0',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap'
-                }}>{elem.para}</p>
+                <h4 className="product-brand">{elem.brand}</h4>
+                <p className="product-desc">{elem.para}</p>
               </div>
 
               <div>
-                <div style={{ display: 'flex', gap: '8px', alignItems: 'baseline', margin: '0 0 15px 0' }}>
-                  <span style={{ fontSize: '16px', fontWeight: '800', color: 'var(--primaryColor)' }}>{elem.price}</span>
+                <div className="product-price-row">
+                  <span className="price-current">{elem.price}</span>
                   {elem.strikedoffprice && (
-                    <span style={{ fontSize: '12px', color: 'var(--textMuted)', textDecoration: 'line-through' }}>{elem.strikedoffprice}</span>
+                    <span className="price-striked">{elem.strikedoffprice}</span>
                   )}
                 </div>
 
                 <button 
+                  className="add-to-bag-btn"
                   onClick={(e) => addToBag(elem, e)}
-                  style={{ 
-                    width: '100%',
-                    padding: '10px 0', 
-                    background: 'var(--accentColor)', 
-                    border: 'none',
-                    borderRadius: '4px', 
-                    fontSize: '12px', 
-                    fontWeight: '700', 
-                    color: '#ffffff', 
-                    cursor: 'pointer',
-                    transition: 'background-color 0.2s, box-shadow 0.2s',
-                    letterSpacing: '1px'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = 'var(--accentHover)';
-                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(255, 63, 108, 0.2)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'var(--accentColor)';
-                    e.currentTarget.style.boxShadow = 'none';
-                  }}
                 >
                   ADD TO BAG
                 </button>

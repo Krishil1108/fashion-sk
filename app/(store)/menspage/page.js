@@ -2,8 +2,6 @@
 
 import React from 'react';
 import ProductListPage from '../../components/ProductListPage';
-import '../../styles/mens.css';
-
 const fallbackMensProducts = [
   {
     image_url: "https://assets.myntassets.com/f_webp,dpr_1.5,q_60,w_210,c_limit,fl_progressive/assets/images/10331501/2020/3/18/d4d07c60-88d9-43d9-aa78-9cc7712816321584508934272-US-Polo-Assn-Men-White-Colourblocked-Sneakers-84015845089331-1.jpg",
