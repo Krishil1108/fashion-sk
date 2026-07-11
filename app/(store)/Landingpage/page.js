@@ -7,7 +7,7 @@ import CategoryNavigation from '../../components/CategoryNavigation';
 
 export default function Landingpage() {
   return (
-    <div style={{ width: "100%", overflow: "hidden", marginTop: "-72px" }}>
+    <div style={{ width: "100%", overflow: "hidden", marginTop: "-104px" }}>
       <HeroBanner />
       <CategoryNavigation />
       <TrendingCollections />

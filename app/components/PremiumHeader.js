@@ -34,7 +34,7 @@ const menuData = {
     href: "/womenspage",
     featured: {
       title: "Summer Collection",
-      image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=600&auto=format&fit=crop",
+      image: "https://images.unsplash.com/photo-1469334031218-e382a71b716b?q=80&w=600&auto=format&fit=crop",
       link: "/womenspage"
     },
     sections: [
@@ -60,7 +60,7 @@ const menuData = {
     href: "/beautypage",
     featured: {
       title: "Clean Skincare",
-      image: "https://images.unsplash.com/photo-1522335221946-8692795f5431?q=80&w=600&auto=format&fit=crop",
+      image: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?q=80&w=600&auto=format&fit=crop",
       link: "/beautypage"
     },
     sections: [
@@ -84,6 +84,12 @@ const menuData = {
   }
 };
 
+const promoMessages = [
+  "🚚  Free Shipping on orders above Rs. 2,000",
+  "🏷️  Use code MYNTRA300 · Save Rs. 300 instantly",
+  "✨  New Summer '26 collection · Shop Now",
+];
+
 export default function PremiumHeader() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -91,6 +97,7 @@ export default function PremiumHeader() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [mounted, setMounted] = useState(false);
+  const [promoIndex, setPromoIndex] = useState(0);
   const pathname = usePathname();
   const { openCart, cartItems, wishlistItems, hydrateFromLocalStorage } = useCartStore();
 
@@ -99,47 +106,102 @@ export default function PremiumHeader() {
     hydrateFromLocalStorage();
     const handleScroll = () => setIsScrolled(window.scrollY > 30);
     window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+
+    // Rotate promo message every 4 seconds
+    const promoInterval = setInterval(() => {
+      setPromoIndex(prev => (prev + 1) % promoMessages.length);
+    }, 4000);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      clearInterval(promoInterval);
+    };
   }, []);
 
   const cartCount = mounted ? cartItems.reduce((acc, item) => acc + item.quantity, 0) : 0;
   const wishlistCount = mounted ? (wishlistItems?.length || 0) : 0;
 
   const isLanding = pathname === "/Landingpage" || pathname === "/";
+  const isTransparent = !isScrolled && !activeMegaMenu && isLanding;
 
-  const headerBg = isScrolled || activeMegaMenu || !isLanding
-    ? "rgba(255,255,255,0.95)"
-    : "transparent";
-  const headerBorder = isScrolled || activeMegaMenu || !isLanding
-    ? "1px solid rgba(0,0,0,0.06)"
-    : "1px solid transparent";
-  const textColor = (isScrolled || activeMegaMenu || !isLanding) ? "#1a1c23" : "white";
+  // Scroll state: dark glass. Transparent on landing hero. White glass on other pages.
+  const headerBg = isTransparent
+    ? "transparent"
+    : isScrolled || activeMegaMenu
+      ? "rgba(10, 10, 13, 0.92)"
+      : "rgba(255,255,255,0.96)";
+
+  const headerBorderBottom = isTransparent
+    ? "1px solid transparent"
+    : isScrolled || activeMegaMenu
+      ? "1px solid rgba(255,255,255,0.06)"
+      : "1px solid rgba(0,0,0,0.07)";
+
+  const textColor = isTransparent
+    ? "white"
+    : isScrolled || activeMegaMenu
+      ? "rgba(255,255,255,0.9)"
+      : "#0f0f12";
+
+  const iconHoverBg = (isScrolled || activeMegaMenu) && !isTransparent
+    ? "rgba(255,255,255,0.08)"
+    : "rgba(0,0,0,0.05)";
 
   return (
     <>
+      {/* ─────── Promo Announcement Bar ─────── */}
+      {isLanding && (
+        <div style={{
+          position: "fixed", top: 0, left: 0, right: 0, zIndex: 101,
+          background: "linear-gradient(90deg, #0c0c0f, #1c1c28 50%, #0c0c0f)",
+          height: "36px", overflow: "hidden",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          borderBottom: "1px solid rgba(201,168,76,0.15)",
+        }}>
+          <AnimatePresence mode="wait">
+            <motion.span
+              key={promoIndex}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.4 }}
+              style={{
+                color: "rgba(245,243,239,0.85)", fontSize: "11px", fontWeight: 600,
+                letterSpacing: "1px", fontFamily: "'Plus Jakarta Sans', sans-serif",
+              }}
+            >
+              {promoMessages[promoIndex]}
+            </motion.span>
+          </AnimatePresence>
+        </div>
+      )}
+
       <header style={{
-        position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
+        position: "fixed",
+        top: isLanding ? "36px" : "0",
+        left: 0, right: 0,
+        zIndex: 100,
         background: headerBg,
-        backdropFilter: (isScrolled || activeMegaMenu) ? "blur(20px)" : "none",
-        WebkitBackdropFilter: (isScrolled || activeMegaMenu) ? "blur(20px)" : "none",
-        borderBottom: headerBorder,
-        transition: "background 0.4s ease, border-color 0.4s ease, backdrop-filter 0.4s ease",
-        boxShadow: isScrolled ? "0 4px 24px rgba(0,0,0,0.06)" : "none",
+        backdropFilter: (isScrolled || activeMegaMenu) ? "blur(24px)" : "none",
+        WebkitBackdropFilter: (isScrolled || activeMegaMenu) ? "blur(24px)" : "none",
+        borderBottom: headerBorderBottom,
+        transition: "background 0.4s ease, border-color 0.4s ease, top 0.3s ease",
+        boxShadow: isScrolled ? "0 4px 32px rgba(0,0,0,0.3)" : "none",
       }}>
         <div style={{
           maxWidth: "1600px", margin: "0 auto",
           padding: "0 5vw",
-          height: "72px",
+          height: "68px",
           display: "flex", alignItems: "center", justifyContent: "space-between",
-          gap: "32px",
+          gap: "24px",
         }}>
+
           {/* Mobile menu button */}
           <button
             onClick={() => setMobileMenuOpen(true)}
             style={{
               display: "none", background: "none", border: "none",
               cursor: "pointer", padding: "8px", color: textColor,
-              '@media (max-width: 1024px)': { display: "flex" },
             }}
             className="lg-hide"
           >
@@ -152,15 +214,19 @@ export default function PremiumHeader() {
             textDecoration: "none", flexShrink: 0,
           }}>
             <div style={{
-              width: "38px", height: "38px", borderRadius: "10px",
-              background: "linear-gradient(135deg, #ff3f6c, #ff6b8b)",
+              width: "36px", height: "36px", borderRadius: "10px",
+              background: "linear-gradient(135deg, #ff3f6c, #e8274b)",
               display: "flex", alignItems: "center", justifyContent: "center",
-              boxShadow: "0 4px 16px rgba(255,63,108,0.35)",
-            }}>
-              <span style={{ color: "white", fontWeight: 900, fontSize: "16px" }}>A.</span>
+              boxShadow: "0 4px 20px rgba(255,63,108,0.4)",
+              transition: "box-shadow 0.3s ease",
+            }}
+            onMouseEnter={e => e.currentTarget.style.boxShadow = "0 4px 28px rgba(201,168,76,0.55)"}
+            onMouseLeave={e => e.currentTarget.style.boxShadow = "0 4px 20px rgba(255,63,108,0.4)"}
+            >
+              <span style={{ color: "white", fontWeight: 900, fontSize: "15px", fontFamily: "'Outfit', sans-serif" }}>A.</span>
             </div>
             <span style={{
-              fontSize: "22px", fontWeight: 900, color: textColor,
+              fontSize: "21px", fontWeight: 900, color: textColor,
               fontFamily: "'Outfit', sans-serif", letterSpacing: "-0.5px",
               transition: "color 0.4s ease",
             }}>Aura</span>
@@ -168,34 +234,36 @@ export default function PremiumHeader() {
 
           {/* Desktop Nav */}
           <nav style={{
-            display: "flex", alignItems: "center", gap: "4px", flex: 1,
+            display: "flex", alignItems: "center", gap: "2px", flex: 1,
             justifyContent: "center",
           }} className="desktop-nav">
             {navItems.map((item) => {
               const isActive = pathname === item.href;
               const hasMega = menuData[item.name];
+              const isMenuActive = activeMegaMenu === item.name;
               return (
                 <div
                   key={item.name}
-                  style={{ position: "relative", height: "72px", display: "flex", alignItems: "center" }}
+                  style={{ position: "relative", height: "68px", display: "flex", alignItems: "center" }}
                   onMouseEnter={() => hasMega && setActiveMegaMenu(item.name)}
                   onMouseLeave={() => setActiveMegaMenu(null)}
                 >
                   <Link href={item.href} style={{
                     position: "relative",
-                    display: "flex", alignItems: "center", gap: "4px",
-                    padding: "8px 14px",
-                    color: isActive || activeMegaMenu === item.name ? "#ff3f6c" : textColor,
-                    fontSize: "13px", fontWeight: 700,
+                    display: "flex", alignItems: "center", gap: "5px",
+                    padding: "8px 13px",
+                    color: (isActive || isMenuActive) ? "#ff3f6c" : textColor,
+                    fontSize: "12.5px", fontWeight: 700,
                     textTransform: "uppercase", letterSpacing: "0.8px",
                     textDecoration: "none",
-                    transition: "color 0.3s ease",
+                    transition: "color 0.25s ease",
                     borderRadius: "8px",
+                    fontFamily: "'Plus Jakarta Sans', sans-serif",
                   }}>
                     {item.name}
                     {item.isNew && (
                       <span style={{
-                        fontSize: "8px", fontWeight: 900,
+                        fontSize: "7px", fontWeight: 900,
                         background: "#ff3f6c", color: "white",
                         padding: "2px 5px", borderRadius: "4px",
                         letterSpacing: "0.5px",
@@ -203,10 +271,11 @@ export default function PremiumHeader() {
                     )}
                     {/* Active underline */}
                     <span style={{
-                      position: "absolute", bottom: "2px", left: "14px", right: "14px",
+                      position: "absolute", bottom: "4px", left: "13px", right: "13px",
                       height: "2px", background: "#ff3f6c", borderRadius: "999px",
                       transform: isActive ? "scaleX(1)" : "scaleX(0)",
                       transition: "transform 0.3s ease",
+                      transformOrigin: "center",
                     }} />
                   </Link>
                 </div>
@@ -214,59 +283,64 @@ export default function PremiumHeader() {
             })}
           </nav>
 
-          {/* Right icons */}
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
+          {/* Right action icons */}
+          <div style={{ display: "flex", alignItems: "center", gap: "4px", flexShrink: 0 }}>
             {/* Search */}
             <button
               onClick={() => setSearchOpen(!searchOpen)}
               style={{
                 display: "flex", alignItems: "center", justifyContent: "center",
                 width: "40px", height: "40px",
-                background: "none", border: "none", cursor: "pointer",
-                color: textColor, borderRadius: "10px",
-                transition: "background 0.2s, color 0.4s",
+                background: searchOpen ? "rgba(255,63,108,0.12)" : "none",
+                border: "none", cursor: "pointer",
+                color: searchOpen ? "#ff3f6c" : textColor,
+                borderRadius: "10px",
+                transition: "background 0.2s, color 0.3s",
               }}
-              onMouseEnter={e => e.currentTarget.style.color = "#ff3f6c"}
-              onMouseLeave={e => e.currentTarget.style.color = textColor}
+              onMouseEnter={e => { e.currentTarget.style.color = "#ff3f6c"; e.currentTarget.style.background = iconHoverBg; }}
+              onMouseLeave={e => { e.currentTarget.style.color = searchOpen ? "#ff3f6c" : textColor; e.currentTarget.style.background = searchOpen ? "rgba(255,63,108,0.12)" : "none"; }}
             >
-              <Search size={20} />
+              <Search size={19} />
             </button>
 
             <Link href="/Profile/profile" style={{
               display: "flex", alignItems: "center", justifyContent: "center",
               width: "40px", height: "40px",
               color: textColor, borderRadius: "10px",
-              transition: "color 0.2s", textDecoration: "none",
+              transition: "color 0.2s, background 0.2s", textDecoration: "none",
             }}
-            onMouseEnter={e => e.currentTarget.style.color = "#ff3f6c"}
-            onMouseLeave={e => e.currentTarget.style.color = textColor}
+            onMouseEnter={e => { e.currentTarget.style.color = "#ff3f6c"; e.currentTarget.style.background = iconHoverBg; }}
+            onMouseLeave={e => { e.currentTarget.style.color = textColor; e.currentTarget.style.background = "none"; }}
             >
-              <User size={20} />
+              <User size={19} />
             </Link>
 
+            {/* Wishlist */}
             <Link href="/wishlist" style={{
               display: "flex", alignItems: "center", justifyContent: "center",
               position: "relative", width: "40px", height: "40px",
               color: textColor, borderRadius: "10px",
-              transition: "color 0.2s, transform 0.2s", textDecoration: "none",
+              transition: "color 0.2s, background 0.2s, transform 0.25s", textDecoration: "none",
             }}
-            onMouseEnter={e => { e.currentTarget.style.color = "#ff3f6c"; e.currentTarget.style.transform = "scale(1.1)"; }}
-            onMouseLeave={e => { e.currentTarget.style.color = textColor; e.currentTarget.style.transform = "scale(1)"; }}
+            onMouseEnter={e => { e.currentTarget.style.color = "#ff3f6c"; e.currentTarget.style.background = iconHoverBg; e.currentTarget.style.transform = "scale(1.1)"; }}
+            onMouseLeave={e => { e.currentTarget.style.color = textColor; e.currentTarget.style.background = "none"; e.currentTarget.style.transform = "scale(1)"; }}
             >
-              <Heart size={20} />
+              <Heart size={19} />
               {wishlistCount > 0 && (
                 <span style={{
-                  position: "absolute", top: "4px", right: "4px",
-                  width: "16px", height: "16px",
+                  position: "absolute", top: "5px", right: "5px",
+                  width: "15px", height: "15px",
                   background: "#ff3f6c", color: "white",
-                  borderRadius: "50%", fontSize: "9px", fontWeight: 900,
+                  borderRadius: "50%", fontSize: "8px", fontWeight: 900,
                   display: "flex", alignItems: "center", justifyContent: "center",
+                  boxShadow: "0 0 8px rgba(255,63,108,0.6)",
                 }}>
                   {wishlistCount}
                 </span>
               )}
             </Link>
 
+            {/* Cart */}
             <button
               onClick={openCart}
               style={{
@@ -274,19 +348,20 @@ export default function PremiumHeader() {
                 position: "relative", width: "40px", height: "40px",
                 background: "none", border: "none", cursor: "pointer",
                 color: textColor, borderRadius: "10px",
-                transition: "color 0.2s",
+                transition: "color 0.2s, background 0.2s",
               }}
-              onMouseEnter={e => e.currentTarget.style.color = "#ff3f6c"}
-              onMouseLeave={e => e.currentTarget.style.color = textColor}
+              onMouseEnter={e => { e.currentTarget.style.color = "#ff3f6c"; e.currentTarget.style.background = iconHoverBg; }}
+              onMouseLeave={e => { e.currentTarget.style.color = textColor; e.currentTarget.style.background = "none"; }}
             >
-              <ShoppingBag size={20} />
+              <ShoppingBag size={19} />
               {cartCount > 0 && (
                 <span style={{
-                  position: "absolute", top: "4px", right: "4px",
-                  width: "16px", height: "16px",
+                  position: "absolute", top: "5px", right: "5px",
+                  width: "15px", height: "15px",
                   background: "#ff3f6c", color: "white",
-                  borderRadius: "50%", fontSize: "9px", fontWeight: 900,
+                  borderRadius: "50%", fontSize: "8px", fontWeight: 900,
                   display: "flex", alignItems: "center", justifyContent: "center",
+                  boxShadow: "0 0 8px rgba(255,63,108,0.6)",
                 }}>
                   {cartCount}
                 </span>
@@ -295,7 +370,7 @@ export default function PremiumHeader() {
           </div>
         </div>
 
-        {/* Mega Menu */}
+        {/* ─── Mega Menu ─── */}
         <AnimatePresence>
           {activeMegaMenu && menuData[activeMegaMenu] && (
             <motion.div
@@ -305,9 +380,9 @@ export default function PremiumHeader() {
               transition={{ duration: 0.2 }}
               style={{
                 position: "absolute", left: 0, right: 0,
-                background: "rgba(255,255,255,0.98)", backdropFilter: "blur(20px)",
+                background: "rgba(255,255,255,0.98)", backdropFilter: "blur(24px)",
                 borderBottom: "1px solid rgba(0,0,0,0.06)",
-                boxShadow: "0 24px 48px rgba(0,0,0,0.08)",
+                boxShadow: "0 28px 60px rgba(0,0,0,0.1)",
                 zIndex: 99,
               }}
               onMouseEnter={() => setActiveMegaMenu(activeMegaMenu)}
@@ -322,20 +397,26 @@ export default function PremiumHeader() {
                 {menuData[activeMegaMenu].sections.map((section) => (
                   <div key={section.title}>
                     <h4 style={{
-                      fontSize: "11px", fontWeight: 900, color: "#8e95a0",
-                      textTransform: "uppercase", letterSpacing: "2px",
+                      fontSize: "10px", fontWeight: 900, color: "#9a9a9a",
+                      textTransform: "uppercase", letterSpacing: "2.5px",
                       marginBottom: "16px", paddingBottom: "12px",
-                      borderBottom: "1px solid #f0f0f0",
+                      borderBottom: "1px solid #f0ede8",
+                      fontFamily: "'Plus Jakarta Sans', sans-serif",
                     }}>
                       {section.title}
                     </h4>
-                    <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "10px" }}>
+                    <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "11px" }}>
                       {section.items.map((item) => (
                         <li key={item}>
                           <Link href={`${menuData[activeMegaMenu].href}?q=${encodeURIComponent(item)}`}
-                            style={{ fontSize: "14px", color: "#636b74", textDecoration: "none", transition: "color 0.2s" }}
+                            style={{
+                              fontSize: "14px", color: "#4a4a5a",
+                              textDecoration: "none", transition: "color 0.2s",
+                              fontFamily: "'Plus Jakarta Sans', sans-serif",
+                              fontWeight: 500,
+                            }}
                             onMouseEnter={e => e.currentTarget.style.color = "#ff3f6c"}
-                            onMouseLeave={e => e.currentTarget.style.color = "#636b74"}
+                            onMouseLeave={e => e.currentTarget.style.color = "#4a4a5a"}
                           >
                             {item}
                           </Link>
@@ -346,8 +427,8 @@ export default function PremiumHeader() {
                 ))}
 
                 {/* Featured promo */}
-                <div style={{ width: "220px" }}>
-                  <div style={{ borderRadius: "16px", overflow: "hidden", position: "relative", height: "160px" }}>
+                <div style={{ width: "230px" }}>
+                  <div style={{ borderRadius: "18px", overflow: "hidden", position: "relative", height: "168px" }}>
                     <img
                       src={menuData[activeMegaMenu].featured.image}
                       alt={menuData[activeMegaMenu].featured.title}
@@ -355,21 +436,26 @@ export default function PremiumHeader() {
                     />
                     <div style={{
                       position: "absolute", inset: 0,
-                      background: "linear-gradient(to top, rgba(0,0,0,0.7), transparent)"
+                      background: "linear-gradient(to top, rgba(0,0,0,0.75), transparent)"
                     }} />
                     <div style={{ position: "absolute", bottom: "12px", left: "12px" }}>
-                      <span style={{ fontSize: "9px", fontWeight: 900, background: "#ff3f6c", color: "white", padding: "2px 8px", borderRadius: "4px", textTransform: "uppercase" }}>Featured</span>
+                      <span style={{
+                        fontSize: "8px", fontWeight: 900, background: "#C9A84C",
+                        color: "#3a2a00", padding: "2px 8px", borderRadius: "4px",
+                        textTransform: "uppercase", letterSpacing: "1px",
+                      }}>Featured</span>
                     </div>
                   </div>
-                  <h4 style={{ fontWeight: 800, color: "#1a1c23", marginTop: "12px", fontSize: "15px" }}>
+                  <h4 style={{ fontWeight: 800, color: "#0f0f12", marginTop: "12px", fontSize: "15px", fontFamily: "'Outfit', sans-serif" }}>
                     {menuData[activeMegaMenu].featured.title}
                   </h4>
                   <Link href={menuData[activeMegaMenu].featured.link} style={{
-                    display: "inline-flex", alignItems: "center", gap: "4px",
-                    marginTop: "8px", fontSize: "13px", color: "#ff3f6c",
-                    fontWeight: 700, textDecoration: "none",
+                    display: "inline-flex", alignItems: "center", gap: "5px",
+                    marginTop: "8px", fontSize: "12px", color: "#ff3f6c",
+                    fontWeight: 800, textDecoration: "none",
+                    fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: "0.5px",
                   }}>
-                    Shop Now <ArrowRight size={14} />
+                    Shop Now <ArrowRight size={13} />
                   </Link>
                 </div>
               </div>
@@ -377,35 +463,38 @@ export default function PremiumHeader() {
           )}
         </AnimatePresence>
 
-        {/* Search Overlay */}
+        {/* ─── Search Overlay ─── */}
         <AnimatePresence>
           {searchOpen && (
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
               style={{
                 position: "absolute", left: 0, right: 0,
-                background: "rgba(255,255,255,0.98)", backdropFilter: "blur(20px)",
+                background: "rgba(255,255,255,0.98)", backdropFilter: "blur(24px)",
                 borderBottom: "1px solid rgba(0,0,0,0.06)",
-                padding: "24px 5vw",
-                boxShadow: "0 24px 48px rgba(0,0,0,0.08)",
+                padding: "22px 5vw",
+                boxShadow: "0 24px 60px rgba(0,0,0,0.1)",
               }}
             >
               <div style={{
-                maxWidth: "600px", margin: "0 auto",
+                maxWidth: "640px", margin: "0 auto",
                 display: "flex", alignItems: "center", gap: "12px",
-                background: "#f4f6f8", borderRadius: "12px", padding: "12px 20px",
+                background: "#F8F5F0", borderRadius: "14px", padding: "13px 20px",
+                border: "1px solid rgba(0,0,0,0.07)",
               }}>
-                <Search size={18} color="#8e95a0" />
+                <Search size={17} color="#9a9a9a" />
                 <input
                   autoFocus
-                  placeholder="Search for clothes, brands, styles..."
+                  placeholder="Search clothes, brands, styles..."
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   style={{
                     flex: 1, background: "none", border: "none", outline: "none",
-                    fontSize: "15px", color: "#1a1c23", fontFamily: "inherit",
+                    fontSize: "14px", color: "#0f0f12", fontFamily: "'Plus Jakarta Sans', sans-serif",
+                    fontWeight: 500,
                   }}
                   onKeyDown={e => {
                     if (e.key === "Enter" && searchQuery.trim()) {
@@ -413,8 +502,8 @@ export default function PremiumHeader() {
                     }
                   }}
                 />
-                <button onClick={() => setSearchOpen(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "#8e95a0" }}>
-                  <X size={18} />
+                <button onClick={() => setSearchOpen(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "#9a9a9a" }}>
+                  <X size={17} />
                 </button>
               </div>
             </motion.div>
@@ -422,7 +511,7 @@ export default function PremiumHeader() {
         </AnimatePresence>
       </header>
 
-      {/* Mobile Menu */}
+      {/* ─── Mobile Menu ─── */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <>
@@ -433,57 +522,68 @@ export default function PremiumHeader() {
               onClick={() => setMobileMenuOpen(false)}
               style={{
                 position: "fixed", inset: 0, zIndex: 200,
-                background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)",
+                background: "rgba(0,0,0,0.65)", backdropFilter: "blur(4px)",
               }}
             />
             <motion.div
               initial={{ x: "-100%" }}
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              transition={{ type: "spring", damping: 28, stiffness: 220 }}
               style={{
                 position: "fixed", top: 0, left: 0, bottom: 0,
                 width: "min(80vw, 320px)", zIndex: 201,
-                background: "white", overflowY: "auto",
-                boxShadow: "8px 0 48px rgba(0,0,0,0.15)",
+                background: "#0c0c0f", overflowY: "auto",
+                boxShadow: "8px 0 60px rgba(0,0,0,0.5)",
               }}
             >
               <div style={{
                 display: "flex", alignItems: "center", justifyContent: "space-between",
-                padding: "20px", borderBottom: "1px solid #f0f0f0",
+                padding: "22px 20px", borderBottom: "1px solid rgba(255,255,255,0.06)",
               }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                   <div style={{
                     width: "34px", height: "34px", borderRadius: "8px",
-                    background: "#ff3f6c", display: "flex", alignItems: "center", justifyContent: "center",
+                    background: "linear-gradient(135deg, #ff3f6c, #e8274b)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
                   }}>
-                    <span style={{ color: "white", fontWeight: 900, fontSize: "14px" }}>A.</span>
+                    <span style={{ color: "white", fontWeight: 900, fontSize: "14px", fontFamily: "'Outfit', sans-serif" }}>A.</span>
                   </div>
-                  <span style={{ fontWeight: 900, fontSize: "18px", color: "#1a1c23" }}>Aura</span>
+                  <span style={{ fontWeight: 900, fontSize: "18px", color: "#f5f3ef", fontFamily: "'Outfit', sans-serif" }}>Aura</span>
                 </div>
-                <button onClick={() => setMobileMenuOpen(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "#636b74" }}>
+                <button onClick={() => setMobileMenuOpen(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "#6a6a7a" }}>
                   <X size={22} />
                 </button>
               </div>
-              <nav style={{ padding: "16px" }}>
+              <nav style={{ padding: "12px" }}>
                 {navItems.map((item) => (
                   <Link key={item.name} href={item.href} onClick={() => setMobileMenuOpen(false)}
                     style={{
                       display: "flex", alignItems: "center", justifyContent: "space-between",
-                      padding: "14px 12px", borderRadius: "10px",
-                      color: "#1a1c23", textDecoration: "none",
+                      padding: "14px 14px", borderRadius: "12px",
+                      color: "#f5f3ef", textDecoration: "none",
                       fontWeight: 700, fontSize: "15px",
-                      borderBottom: "1px solid #f4f6f8",
+                      borderBottom: "1px solid rgba(255,255,255,0.04)",
+                      fontFamily: "'Plus Jakarta Sans', sans-serif",
+                      transition: "background 0.2s",
                     }}
+                    onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.04)"}
+                    onMouseLeave={e => e.currentTarget.style.background = "none"}
                   >
                     <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                       {item.name}
                       {item.isNew && <span style={{ fontSize: "8px", fontWeight: 900, background: "#ff3f6c", color: "white", padding: "2px 5px", borderRadius: "4px" }}>NEW</span>}
                     </span>
-                    <ChevronDown size={16} color="#8e95a0" style={{ transform: "rotate(-90deg)" }} />
+                    <ChevronDown size={15} color="#6a6a7a" style={{ transform: "rotate(-90deg)" }} />
                   </Link>
                 ))}
               </nav>
+              {/* Gold accent strip at bottom */}
+              <div style={{
+                position: "absolute", bottom: 0, left: 0, right: 0,
+                height: "3px",
+                background: "linear-gradient(90deg, transparent, #C9A84C 50%, transparent)",
+              }} />
             </motion.div>
           </>
         )}
