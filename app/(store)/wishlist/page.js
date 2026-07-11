@@ -1,197 +1,153 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useCartStore } from '../../store/useCartStore';
+import { Heart, ShoppingBag, X, ArrowRight, Star } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+
 export default function WishlistPage() {
-  const [wishlist, setWishlist] = useState([]);
+  const router = useRouter();
+  const [mounted, setMounted] = useState(false);
+  const { wishlistItems, removeFromWishlist, addToCart } = useCartStore();
 
   useEffect(() => {
-    const list = JSON.parse(localStorage.getItem('wishListObj')) || [];
-    setWishlist(list);
+    setMounted(true);
   }, []);
 
-  const removeFromWishlist = (idx, e) => {
+  const handleMoveToCart = (item, e) => {
     e.stopPropagation();
-    const updated = [...wishlist];
-    updated.splice(idx, 1);
-    setWishlist(updated);
-    localStorage.setItem('wishListObj', JSON.stringify(updated));
-    window.dispatchEvent(new Event('cart-updated')); // Update header count
-  };
-
-  const moveToBag = (elem, idx, e) => {
-    e.stopPropagation();
-    // Add to bag
-    const bag = JSON.parse(localStorage.getItem('BagListObj')) || [];
-    bag.push(elem);
-    localStorage.setItem('BagListObj', JSON.stringify(bag));
-
+    // Add to cart with default size 'M'
+    addToCart({
+      id: item.id,
+      brand: item.brand,
+      para: item.para,
+      price: item.price,
+      image_url: item.image_url
+    }, 'M', 1);
+    
     // Remove from wishlist
-    const updatedWishlist = [...wishlist];
-    updatedWishlist.splice(idx, 1);
-    setWishlist(updatedWishlist);
-    localStorage.setItem('wishListObj', JSON.stringify(updatedWishlist));
-
-    window.dispatchEvent(new Event('cart-updated')); // Update header counts
+    removeFromWishlist(item.id);
   };
+
+  const handleRemove = (item, e) => {
+    e.stopPropagation();
+    removeFromWishlist(item.id);
+  };
+
+  if (!mounted) return null;
 
   return (
-    <div style={{ marginTop: '0', padding: '0' }}>
-      <h1 style={{ 
-        margin: '0 0 25px 0', 
-        textTransform: 'uppercase', 
-        letterSpacing: '1px', 
-        fontSize: '22px',
-        fontWeight: '800',
-        color: 'var(--primaryColor)',
-        fontFamily: 'var(--secondaryFont)',
-        textAlign: 'center'
-      }}>
-        My Wishlist <span style={{ fontSize: '14px', color: 'var(--textMuted)', fontWeight: '500', textTransform: 'lowercase' }}>({wishlist.length} items)</span>
-      </h1>
+    <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      {/* Header */}
+      <div className="text-center mb-12">
+        <span className="text-[#ff3f6c] text-xs font-extrabold uppercase tracking-widest block mb-2">
+          Your Curated List
+        </span>
+        <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white flex items-center justify-center gap-3">
+          My Wishlist
+          <span className="text-sm font-semibold bg-gray-100 dark:bg-white/10 px-3 py-1 rounded-full text-gray-500 dark:text-gray-400">
+            {wishlistItems.length} items
+          </span>
+        </h1>
+      </div>
 
-      {wishlist.length === 0 ? (
-        <div style={{ textAlign: 'center', marginTop: '80px', fontSize: '16px', color: 'var(--textMuted)' }}>
-          <p style={{ marginBottom: '15px' }}>Your wishlist is empty!</p>
-          <a href="/Landingpage" style={{ 
-            color: 'var(--accentColor)', 
-            textDecoration: 'none', 
-            fontWeight: '700',
-            fontSize: '14px',
-            textTransform: 'uppercase',
-            letterSpacing: '0.5px'
-          }}>Continue Shopping</a>
-        </div>
-      ) : (
-        <div id="container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '30px' }}>
-          {wishlist.map((elem, idx) => (
-            <div className="product-card" key={idx} style={{ 
-              backgroundColor: 'var(--cardBg)', 
-              borderRadius: 'var(--borderRadius)', 
-              overflow: 'hidden', 
-              cursor: 'pointer', 
-              boxShadow: 'var(--shadowLight)',
-              transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-              position: 'relative',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-              border: 'none'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-5px)';
-              e.currentTarget.style.boxShadow = 'var(--shadowHover)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = 'var(--shadowLight)';
-            }}
+      <AnimatePresence mode="popLayout">
+        {wishlistItems.length === 0 ? (
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            className="text-center py-20 max-w-md mx-auto"
+          >
+            <div className="w-20 h-20 bg-gray-50 dark:bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Heart className="w-8 h-8 text-gray-300 dark:text-gray-600" />
+            </div>
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Your wishlist is empty</h3>
+            <p className="text-gray-500 dark:text-gray-400 text-sm mb-8">
+              Explore our collections and save your favorite items here to view them later.
+            </p>
+            <Link 
+              href="/menspage" 
+              className="inline-flex items-center gap-2 bg-[#ff3f6c] hover:bg-[#e02454] text-white px-8 py-4 rounded-full font-bold uppercase tracking-wider text-xs shadow-lg shadow-[#ff3f6c]/20 hover:scale-105 transition-all"
             >
-              {/* IMAGE WRAPPER */}
-              <div style={{ position: 'relative', overflow: 'hidden', height: '280px' }}>
-                <img 
-                  src={elem.image_url} 
-                  alt={elem.para} 
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                />
-                
-                {/* REMOVE FROM WISHLIST ICON OVERLAY */}
-                <div 
-                  onClick={(e) => removeFromWishlist(idx, e)}
-                  style={{
-                    position: 'absolute',
-                    top: '12px',
-                    right: '12px',
-                    width: '32px',
-                    height: '32px',
-                    borderRadius: '50%',
-                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                    cursor: 'pointer',
-                    zIndex: 5,
-                    fontSize: '12px',
-                    fontWeight: 'bold',
-                    color: '#7e818c',
-                    transition: 'color 0.2s, transform 0.2s'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.color = 'var(--accentColor)';
-                    e.currentTarget.style.transform = 'scale(1.1)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.color = '#7e818c';
-                    e.currentTarget.style.transform = 'scale(1)';
-                  }}
-                >
-                  ✕
-                </div>
-              </div>
-
-              {/* CONTENT BOX */}
-              <div style={{ padding: '20px', flexGrow: 1, display: 'flex', flexDirection: 'column', justifycontent: 'space-between' }}>
-                <div>
-                  <h4 style={{ 
-                    fontFamily: 'var(--secondaryFont)', 
-                    fontSize: '14px', 
-                    fontWeight: '700', 
-                    color: 'var(--primaryColor)', 
-                    margin: '0 0 4px 0',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.5px'
-                  }}>{elem.brand}</h4>
+              Start Shopping <ArrowRight className="w-4 h-4" />
+            </Link>
+          </motion.div>
+        ) : (
+          <motion.div 
+            layout
+            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 sm:gap-8"
+          >
+            {wishlistItems.map((item) => (
+              <motion.div
+                layout
+                key={item.id}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.3 }}
+                onClick={() => router.push(`/product/${item.id}`)}
+                className="bg-white dark:bg-[#0b0c10] border border-gray-100 dark:border-white/5 rounded-3xl overflow-hidden cursor-pointer shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group relative"
+              >
+                {/* Image Wrap */}
+                <div className="aspect-[3/4] overflow-hidden bg-gray-50 dark:bg-white/5 relative">
+                  <img 
+                    src={item.image_url} 
+                    alt={item.para} 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
+                  />
                   
-                  <p style={{ 
-                    fontSize: '13px', 
-                    color: 'var(--textMuted)', 
-                    margin: '0 0 12px 0',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap'
-                  }}>{elem.para}</p>
+                  {/* Remove Button */}
+                  <button 
+                    onClick={(e) => handleRemove(item, e)}
+                    className="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/90 dark:bg-black/80 backdrop-blur-sm border-none shadow-md flex items-center justify-center text-gray-500 hover:text-[#ff3f6c] transition-colors z-10"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+
+                  {/* Move to Bag Quick Action */}
+                  <div className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
+                    <button 
+                      onClick={(e) => handleMoveToCart(item, e)}
+                      className="w-full py-3 bg-[#ff3f6c] hover:bg-[#e02454] text-white rounded-2xl text-xs font-bold uppercase tracking-wider shadow-lg flex items-center justify-center gap-1.5 transition-colors"
+                    >
+                      <ShoppingBag className="w-4 h-4" /> Move to Bag
+                    </button>
+                  </div>
                 </div>
 
-                <div>
-                  <div style={{ display: 'flex', gap: '8px', alignItems: 'baseline', margin: '0 0 15px 0' }}>
-                    <span style={{ fontSize: '16px', fontWeight: '800', color: 'var(--primaryColor)' }}>{elem.price}</span>
-                    {elem.strikedoffprice && (
-                      <span style={{ fontSize: '12px', color: 'var(--textMuted)', textDecoration: 'line-through' }}>{elem.strikedoffprice}</span>
-                    )}
+                {/* Card Content */}
+                <div className="p-5 flex-grow flex flex-col justify-between">
+                  <div>
+                    <div className="flex justify-between items-start gap-2 mb-1.5">
+                      <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#ff3f6c]">
+                        {item.brand}
+                      </span>
+                    </div>
+                    <h3 className="text-sm font-bold text-gray-900 dark:text-white leading-snug line-clamp-2 mb-3">
+                      {item.para}
+                    </h3>
                   </div>
 
-                  <button 
-                    onClick={(e) => moveToBag(elem, idx, e)}
-                    style={{ 
-                      width: '100%',
-                      padding: '10px 0', 
-                      background: 'var(--accentColor)', 
-                      border: 'none',
-                      borderRadius: '4px', 
-                      fontSize: '12px', 
-                      fontWeight: '700', 
-                      color: '#ffffff', 
-                      cursor: 'pointer',
-                      transition: 'background-color 0.2s, box-shadow 0.2s',
-                      letterSpacing: '1px'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = 'var(--accentHover)';
-                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(255, 63, 108, 0.2)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'var(--accentColor)';
-                      e.currentTarget.style.boxShadow = 'none';
-                    }}
-                  >
-                    MOVE TO BAG
-                  </button>
+                  <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-50 dark:border-white/5">
+                    <span className="text-base font-black text-gray-900 dark:text-white">
+                      Rs. {item.price?.toLocaleString?.() ?? item.price}
+                    </span>
+                    <button 
+                      onClick={(e) => handleMoveToCart(item, e)}
+                      className="w-8 h-8 rounded-full bg-gray-50 hover:bg-[#ff3f6c]/10 text-gray-600 hover:text-[#ff3f6c] flex items-center justify-center transition-colors sm:hidden"
+                    >
+                      <ShoppingBag className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

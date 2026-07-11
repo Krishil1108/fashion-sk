@@ -20,10 +20,9 @@ export default function ProductListPage({ category, title, fallbackProducts, sea
   const [minRating, setMinRating] = useState(0);
   const [sortBy, setSortBy] = useState('popularity');
   const [layoutMode, setLayoutMode] = useState('grid');
-  const [wishlistedMap, setWishlistedMap] = useState({});
   const [selectedQuickView, setSelectedQuickView] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { openCart, addItem } = useCartStore();
+  const { openCart, addItem, wishlistItems, toggleWishlist } = useCartStore();
 
   useEffect(() => {
     async function fetchProducts() {
@@ -96,12 +95,7 @@ export default function ProductListPage({ category, title, fallbackProducts, sea
     fetchProducts();
   }, [category, fallbackProducts, searchQuery]);
 
-  useEffect(() => {
-    const wishlist = JSON.parse(localStorage.getItem("wishListObj")) || [];
-    const map = {};
-    wishlist.forEach(item => { map[item.image_url] = true; });
-    setWishlistedMap(map);
-  }, []);
+  // Wishlist sync handled reactively via Zustand store
 
   useEffect(() => {
     let result = [...products];
@@ -118,18 +112,9 @@ export default function ProductListPage({ category, title, fallbackProducts, sea
     setFilteredProducts(result);
   }, [selectedBrands, priceRange, selectedSizes, onlySustainable, onlyExpress, minRating, sortBy, products]);
 
-  const toggleWishlist = (elem, e) => {
+  const handleWishlistToggle = (elem, e) => {
     e.stopPropagation();
-    let wishlist = JSON.parse(localStorage.getItem("wishListObj")) || [];
-    const isWishlisted = wishlistedMap[elem.image_url];
-    if (isWishlisted) {
-      wishlist = wishlist.filter(item => item.image_url !== elem.image_url);
-      setWishlistedMap(prev => ({ ...prev, [elem.image_url]: false }));
-    } else {
-      wishlist.push(elem);
-      setWishlistedMap(prev => ({ ...prev, [elem.image_url]: true }));
-    }
-    localStorage.setItem("wishListObj", JSON.stringify(wishlist));
+    toggleWishlist(elem);
   };
 
   const handleAddToBag = (elem, e) => {
@@ -414,8 +399,8 @@ export default function ProductListPage({ category, title, fallbackProducts, sea
                   key={elem.id}
                   elem={elem}
                   index={i}
-                  wishlisted={!!wishlistedMap[elem.image_url]}
-                  onWishlist={(e) => toggleWishlist(elem, e)}
+                  wishlisted={!!wishlistItems.some(item => item.id === elem.id || item.image_url === elem.image_url)}
+                  onWishlist={(e) => handleWishlistToggle(elem, e)}
                   onAddToBag={(e) => handleAddToBag(elem, e)}
                   onQuickView={() => setSelectedQuickView(elem)}
                   onClick={() => router.push(`/product/${elem.id}`)}

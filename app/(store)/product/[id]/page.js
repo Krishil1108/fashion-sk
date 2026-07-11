@@ -22,10 +22,30 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState("");
-  const [isWishlisted, setIsWishlisted] = useState(false);
   const [activeTab, setActiveTab] = useState("specs");
 
-  const addToCartStore = useCartStore(state => state.addToCart);
+  const { addToCart, wishlistItems, toggleWishlist } = useCartStore();
+  const isWishlisted = product ? wishlistItems.some(item => item.id === product.id) : false;
+
+  // Zoomable Gallery State
+  const [zoomStyle, setZoomStyle] = useState({ transformOrigin: 'center center', transform: 'scale(1)' });
+
+  const handleMouseMove = (e) => {
+    const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - left) / width) * 100;
+    const y = ((e.clientY - top) / height) * 100;
+    setZoomStyle({
+      transformOrigin: `${x}% ${y}%`,
+      transform: 'scale(1.7)'
+    });
+  };
+
+  const handleMouseLeaveImage = () => {
+    setZoomStyle({
+      transformOrigin: 'center center',
+      transform: 'scale(1)'
+    });
+  };
 
   // Fit Predictor States
   const [showFitPredictor, setShowFitPredictor] = useState(false);
@@ -95,8 +115,16 @@ export default function ProductDetailPage() {
     if (id) fetchProduct();
   }, [id]);
 
-  const toggleWishlist = () => {
-    setIsWishlisted(!isWishlisted);
+  const handleToggleWishlist = () => {
+    if (product) {
+      toggleWishlist({
+        id: product.id,
+        brand: product.brand,
+        para: product.title,
+        price: product.price,
+        image_url: product.images[0]
+      });
+    }
   };
 
   const handleFitPredictor = (e) => {
@@ -124,7 +152,7 @@ export default function ProductDetailPage() {
       return;
     }
 
-    addToCartStore(
+    addToCart(
       {
         id: product.id,
         brand: product.brand,
@@ -140,7 +168,7 @@ export default function ProductDetailPage() {
     selectedAddons.forEach(addonId => {
       const addonItem = mockLookItems.find(item => item.id === addonId);
       if (addonItem) {
-        addToCartStore(
+        addToCart(
           {
             id: addonItem.id,
             brand: "Aura Essentials",
@@ -188,7 +216,11 @@ export default function ProductDetailPage() {
         
         {/* Left Side: Images Gallery */}
         <div className="flex flex-col gap-6">
-          <div className="relative aspect-[3/4] overflow-hidden rounded-3xl bg-gray-50 border border-gray-100 dark:border-white/5">
+          <div 
+            onMouseMove={handleMouseMove}
+            onMouseLeave={handleMouseLeaveImage}
+            className="relative aspect-[3/4] overflow-hidden rounded-3xl bg-gray-50 border border-gray-100 dark:border-white/5 cursor-zoom-in"
+          >
             <motion.img
               key={selectedImage}
               initial={{ opacity: 0 }}
@@ -196,7 +228,14 @@ export default function ProductDetailPage() {
               transition={{ duration: 0.3 }}
               src={product.images[selectedImage]}
               alt={product.title}
-              className="w-full h-full object-cover"
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                transform: zoomStyle.transform,
+                transformOrigin: zoomStyle.transformOrigin,
+                transition: "transform 0.1s ease-out"
+              }}
             />
             {/* Interactive Zoom Overlay indicator */}
             <div className="absolute bottom-4 right-4 bg-black/60 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-bold pointer-events-none">
@@ -323,11 +362,44 @@ export default function ProductDetailPage() {
               Add to Bag
             </button>
             <button
-              onClick={toggleWishlist}
+              onClick={handleToggleWishlist}
               className={`p-4 border rounded-2xl transition-all ${isWishlisted ? "bg-red-500/10 border-red-500/30 text-[#ff3f6c]" : "border-gray-200 dark:border-white/10 text-gray-500 hover:border-[#ff3f6c]"}`}
             >
               <Heart className={`w-5 h-5 ${isWishlisted ? "fill-current" : ""}`} />
             </button>
+          </div>
+
+          {/* Rating breakdown progress bars */}
+          <div className="bg-gray-50 dark:bg-white/5 border border-gray-200/50 dark:border-white/5 rounded-3xl p-6 my-4">
+            <h4 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-4">Customer Reviews</h4>
+            <div className="flex gap-6 items-center">
+              <div className="text-center shrink-0">
+                <span className="text-5xl font-black text-gray-900 dark:text-white">{product.rating}</span>
+                <div className="flex justify-center text-amber-400 mt-1 mb-1">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Star key={i} className="w-3.5 h-3.5 fill-current" />
+                  ))}
+                </div>
+                <span className="text-xs text-gray-400 font-medium">{product.reviewsCount} Ratings</span>
+              </div>
+              <div className="flex-1 flex flex-col gap-2">
+                {[
+                  { stars: 5, pct: 75 },
+                  { stars: 4, pct: 15 },
+                  { stars: 3, pct: 6 },
+                  { stars: 2, pct: 3 },
+                  { stars: 1, pct: 1 }
+                ].map(({ stars, pct }) => (
+                  <div key={stars} className="flex items-center gap-3 text-xs font-semibold">
+                    <span className="w-3 text-right">{stars} ★</span>
+                    <div className="flex-1 h-2 bg-gray-200 dark:bg-white/10 rounded-full overflow-hidden">
+                      <div className="h-full bg-amber-400 rounded-full" style={{ width: `${pct}%` }} />
+                    </div>
+                    <span className="w-7 text-right text-gray-400">{pct}%</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
 
           {/* Detail Tabs */}

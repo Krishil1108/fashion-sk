@@ -92,16 +92,18 @@ export default function PremiumHeader() {
   const [searchQuery, setSearchQuery] = useState("");
   const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
-  const { openCart, cartItems } = useCartStore();
+  const { openCart, cartItems, wishlistItems, hydrateFromLocalStorage } = useCartStore();
 
   useEffect(() => {
     setMounted(true);
+    hydrateFromLocalStorage();
     const handleScroll = () => setIsScrolled(window.scrollY > 30);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const cartCount = mounted ? cartItems.reduce((acc, item) => acc + item.quantity, 0) : 0;
+  const wishlistCount = mounted ? (wishlistItems?.length || 0) : 0;
 
   const isLanding = pathname === "/Landingpage" || pathname === "/";
 
@@ -244,14 +246,25 @@ export default function PremiumHeader() {
 
             <Link href="/wishlist" style={{
               display: "flex", alignItems: "center", justifyContent: "center",
-              width: "40px", height: "40px",
+              position: "relative", width: "40px", height: "40px",
               color: textColor, borderRadius: "10px",
-              transition: "color 0.2s", textDecoration: "none",
+              transition: "color 0.2s, transform 0.2s", textDecoration: "none",
             }}
-            onMouseEnter={e => e.currentTarget.style.color = "#ff3f6c"}
-            onMouseLeave={e => e.currentTarget.style.color = textColor}
+            onMouseEnter={e => { e.currentTarget.style.color = "#ff3f6c"; e.currentTarget.style.transform = "scale(1.1)"; }}
+            onMouseLeave={e => { e.currentTarget.style.color = textColor; e.currentTarget.style.transform = "scale(1)"; }}
             >
               <Heart size={20} />
+              {wishlistCount > 0 && (
+                <span style={{
+                  position: "absolute", top: "4px", right: "4px",
+                  width: "16px", height: "16px",
+                  background: "#ff3f6c", color: "white",
+                  borderRadius: "50%", fontSize: "9px", fontWeight: 900,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                }}>
+                  {wishlistCount}
+                </span>
+              )}
             </Link>
 
             <button

@@ -176,6 +176,16 @@ export default function SearchBar() {
                             {item.title}
                           </span>
                         </div>
+                        <div className="flex flex-col items-end shrink-0">
+                          <span className="text-sm font-black text-gray-900 dark:text-white">
+                            Rs. {item.price}
+                          </span>
+                          {item.offer && (
+                            <span className="text-[9px] font-bold text-[#ff3f6c] bg-[#ff3f6c]/10 px-1.5 py-0.5 rounded mt-0.5">
+                              {item.offer}
+                            </span>
+                          )}
+                        </div>
                       </li>
                     ))}
                     <li

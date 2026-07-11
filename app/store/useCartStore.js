@@ -5,6 +5,7 @@ export const useCartStore = create(
   persist(
     (set, get) => ({
       cartItems: [],
+      wishlistItems: [],
       isCartOpen: false,
       
       toggleCart: () => set((state) => ({ isCartOpen: !state.isCartOpen })),
@@ -81,6 +82,102 @@ export const useCartStore = create(
       getCartCount: () => {
         const state = get();
         return state.cartItems.reduce((count, item) => count + item.quantity, 0);
+      },
+
+      // Wishlist Actions
+      addToWishlist: (product) => {
+        set((state) => {
+          const exists = state.wishlistItems.some(item => item.id === product.id);
+          if (exists) return {};
+          return { wishlistItems: [...state.wishlistItems, product] };
+        });
+      },
+
+      removeFromWishlist: (productId) => {
+        set((state) => ({
+          wishlistItems: state.wishlistItems.filter(item => item.id !== productId)
+        }));
+      },
+
+      toggleWishlist: (product) => {
+        const state = get();
+        const exists = state.wishlistItems.some(item => item.id === product.id);
+        if (exists) {
+          state.removeFromWishlist(product.id);
+        } else {
+          state.addToWishlist(product);
+        }
+      },
+
+      isInWishlist: (productId) => {
+        const state = get();
+        return state.wishlistItems.some(item => item.id === productId);
+      },
+
+      clearWishlist: () => set({ wishlistItems: [] }),
+
+      // Hydration utility for legacy data
+      hydrateFromLocalStorage: () => {
+        const state = get();
+        let updated = false;
+        const newCart = [...state.cartItems];
+        const newWishlist = [...state.wishlistItems];
+
+        // Hydrate cart if empty
+        if (state.cartItems.length === 0) {
+          try {
+            const legacyBag = JSON.parse(localStorage.getItem('BagListObj')) || [];
+            if (legacyBag.length > 0) {
+              legacyBag.forEach(item => {
+                const priceVal = typeof item.price === 'string' 
+                  ? parseInt(item.price.replace(/[^0-9]/g, ''), 10) || 0 
+                  : item.price;
+                const formatted = {
+                  id: item.id || item._id,
+                  brand: item.brand,
+                  para: item.para || item.name,
+                  price: priceVal,
+                  image_url: item.image_url || item.image,
+                  quantity: item.quantity || 1,
+                  size: item.size || 'M'
+                };
+                if (!newCart.find(c => c.id === formatted.id && c.size === formatted.size)) {
+                  newCart.push(formatted);
+                }
+              });
+              updated = true;
+            }
+          } catch(e) {}
+        }
+
+        // Hydrate wishlist if empty
+        if (state.wishlistItems.length === 0) {
+          try {
+            const legacyWish = JSON.parse(localStorage.getItem('wishListObj')) || [];
+            if (legacyWish.length > 0) {
+              legacyWish.forEach(item => {
+                const priceVal = typeof item.price === 'string'
+                  ? parseInt(item.price.replace(/[^0-9]/g, ''), 10) || 0
+                  : item.price;
+                const formatted = {
+                  id: item.id || item._id,
+                  brand: item.brand,
+                  para: item.para || item.name,
+                  price: priceVal,
+                  image_url: item.image_url || item.image
+                };
+                if (!newWishlist.find(w => w.id === formatted.id)) {
+                  newWishlist.push(formatted);
+                }
+              });
+              updated = true;
+            }
+          } catch(e) {}
+        }
+
+        if (updated) {
+          set({ cartItems: newCart, wishlistItems: newWishlist });
+        }
       }
     }),
     {

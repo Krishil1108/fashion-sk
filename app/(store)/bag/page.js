@@ -2,54 +2,35 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useCartStore } from '../../store/useCartStore';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ShoppingBag, X, Minus, Plus, ArrowRight, Gift, ShieldCheck } from 'lucide-react';
+import Link from 'next/link';
+
 export default function CartPage() {
   const router = useRouter();
-  const [cartItems, setCartItems] = useState([]);
+  const [mounted, setMounted] = useState(false);
+  const { cartItems, updateQuantity, removeFromCart, getCartTotal, clearCart } = useCartStore();
+  
   const [promoCode, setPromoCode] = useState('');
   const [promoApplied, setPromoApplied] = useState(false);
   const [promoDiscount, setPromoDiscount] = useState(0);
 
   useEffect(() => {
-    const items = JSON.parse(localStorage.getItem('BagListObj')) || [];
-    setCartItems(items);
+    setMounted(true);
   }, []);
 
-  const parsePrice = (priceStr) => {
-    if (!priceStr) return 0;
-    const num = priceStr.toString().replace(/[^0-9]/g, '');
-    return parseInt(num, 10) || 0;
-  };
+  if (!mounted) return null;
 
-  const calculateTotalMRP = () => {
-    return cartItems.reduce((sum, item) => {
-      const priceVal = parsePrice(item.strikedoffprice || item.price);
-      return sum + priceVal;
-    }, 0);
-  };
-
-  const calculateTotalAmount = () => {
-    return cartItems.reduce((sum, item) => {
-      return sum + parsePrice(item.price);
-    }, 0);
-  };
-
-  const totalMRP = calculateTotalMRP();
-  const totalAmount = calculateTotalAmount();
-  const standardDiscount = totalMRP - totalAmount;
-  const finalPayable = Math.max(0, totalAmount - promoDiscount);
-
-  const removeItem = (idx) => {
-    const updated = [...cartItems];
-    updated.splice(idx, 1);
-    setCartItems(updated);
-    localStorage.setItem('BagListObj', JSON.stringify(updated));
-    window.dispatchEvent(new Event('cart-updated')); // Update layout header
-  };
+  const total = getCartTotal();
+  const shipping = total > 2000 ? 0 : 150;
+  const discount = promoDiscount;
+  const finalPayable = Math.max(0, total + shipping - discount);
 
   const handleApplyPromo = () => {
     if (promoApplied) return;
     if (promoCode.trim().toUpperCase() === 'MYNTRA300') {
-      if (totalAmount > 300) {
+      if (total > 300) {
         setPromoDiscount(300);
         setPromoApplied(true);
       } else {
@@ -61,223 +42,175 @@ export default function CartPage() {
   };
 
   const handlePlaceOrder = () => {
-    localStorage.setItem('payable_amount', finalPayable);
-    router.push('/payment');
+    router.push('/checkout');
   };
 
   return (
-    <div style={{ marginTop: '0', padding: '0' }}>
-      <h1 style={{ 
-        margin: '0 0 25px 0', 
-        textTransform: 'uppercase', 
-        letterSpacing: '1px', 
-        fontSize: '22px',
-        fontWeight: '800',
-        color: 'var(--primaryColor)',
-        fontFamily: 'var(--secondaryFont)',
-        textAlign: 'center'
-      }}>
-        Shopping Bag <span style={{ fontSize: '14px', color: 'var(--textMuted)', fontWeight: '500', textTransform: 'lowercase' }}>({cartItems.length} items)</span>
-      </h1>
+    <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="text-center mb-12">
+        <span className="text-[#ff3f6c] text-xs font-extrabold uppercase tracking-widest block mb-2">
+          Your Selection
+        </span>
+        <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white flex items-center justify-center gap-3">
+          Shopping Bag
+          <span className="text-sm font-semibold bg-gray-100 dark:bg-white/10 px-3 py-1 rounded-full text-gray-500 dark:text-gray-400">
+            {cartItems.length} items
+          </span>
+        </h1>
+      </div>
 
-      {cartItems.length === 0 ? (
-        <div style={{ textAlign: 'center', marginTop: '80px', fontSize: '16px', color: 'var(--textMuted)' }}>
-          <p style={{ marginBottom: '15px' }}>Your shopping bag is empty!</p>
-          <a href="/Landingpage" style={{ 
-            color: 'var(--accentColor)', 
-            textDecoration: 'none', 
-            fontWeight: '700',
-            fontSize: '14px',
-            textTransform: 'uppercase',
-            letterSpacing: '0.5px'
-          }}>Shop Now</a>
-        </div>
-      ) : (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '30px', maxWidth: '1000px', margin: 'auto' }}>
-          {/* Cart Items List */}
-          <div className="cart-items-list" style={{ flex: '1.6', minWidth: '320px' }}>
-            {cartItems.map((item, idx) => (
-              <div key={idx} style={{ 
-                display: 'flex', 
-                gap: '20px', 
-                padding: '20px', 
-                backgroundColor: 'var(--cardBg)',
-                borderRadius: 'var(--borderRadius)',
-                boxShadow: 'var(--shadowLight)',
-                marginBottom: '20px', 
-                position: 'relative'
-              }}>
-                <div style={{ width: '90px', height: '110px', overflow: 'hidden', borderRadius: '6px' }}>
-                  <img src={item.image_url} alt={item.para} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                </div>
-                
-                <div style={{ flex: '1', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                  <div>
-                    <p style={{ fontSize: '15px', fontWeight: '700', margin: '0 0 4px 0', color: 'var(--primaryColor)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{item.brand}</p>
-                    <p style={{ fontSize: '13px', color: 'var(--textMuted)', margin: '0 0 10px 0' }}>{item.para}</p>
-                  </div>
-                  
-                  <div style={{ display: 'flex', gap: '10px', alignItems: 'baseline' }}>
-                    <span style={{ fontSize: '16px', fontWeight: '800', color: 'var(--primaryColor)' }}>{item.price}</span>
-                    {item.strikedoffprice && (
-                      <span style={{ fontSize: '12px', color: 'var(--textMuted)', textDecoration: 'line-through' }}>{item.strikedoffprice}</span>
-                    )}
-                    {item.offer && (
-                      <span style={{ fontSize: '11px', color: 'var(--accentColor)', fontWeight: '800' }}>{item.offer.replace(/[()]/g, '')}</span>
-                    )}
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
-                  <button 
-                    onClick={() => removeItem(idx)}
-                    style={{ 
-                      background: 'none', 
-                      border: 'none', 
-                      color: 'var(--textMuted)', 
-                      fontSize: '11px', 
-                      fontWeight: '700', 
-                      cursor: 'pointer',
-                      transition: 'color 0.2s',
-                      letterSpacing: '0.5px'
-                    }}
-                    onMouseEnter={(e) => e.target.style.color = 'var(--accentColor)'}
-                    onMouseLeave={(e) => e.target.style.color = 'var(--textMuted)'}
+      <AnimatePresence mode="popLayout">
+        {cartItems.length === 0 ? (
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            className="text-center py-20 max-w-md mx-auto"
+          >
+            <div className="w-20 h-20 bg-gray-50 dark:bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6">
+              <ShoppingBag className="w-8 h-8 text-gray-300 dark:text-gray-600" />
+            </div>
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Your shopping bag is empty</h3>
+            <p className="text-gray-500 dark:text-gray-400 text-sm mb-8">
+              Looks like you haven't added anything to your cart yet.
+            </p>
+            <Link 
+              href="/menspage" 
+              className="inline-flex items-center gap-2 bg-[#ff3f6c] hover:bg-[#e02454] text-white px-8 py-4 rounded-full font-bold uppercase tracking-wider text-xs shadow-lg shadow-[#ff3f6c]/20 hover:scale-105 transition-all"
+            >
+              Start Shopping <ArrowRight className="w-4 h-4" />
+            </Link>
+          </motion.div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            {/* Cart Items List */}
+            <div className="lg:col-span-7 space-y-4">
+              <AnimatePresence mode="popLayout">
+                {cartItems.map((item) => (
+                  <motion.div 
+                    layout
+                    key={`${item.id}-${item.size}`}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, x: -50 }}
+                    className="flex gap-4 p-4 bg-white dark:bg-[#0b0c10] border border-gray-100 dark:border-white/5 rounded-3xl relative shadow-sm"
                   >
-                    REMOVE
+                    <div className="w-20 h-24 bg-gray-50 dark:bg-white/5 rounded-2xl overflow-hidden shrink-0 border border-gray-100 dark:border-white/5">
+                      <img src={item.image || item.image_url} alt={item.name || item.para} className="w-full h-full object-cover" />
+                    </div>
+                    
+                    <div className="flex-1 min-w-0 flex flex-col justify-between">
+                      <div>
+                        <div className="flex justify-between items-start gap-2">
+                          <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#ff3f6c]">
+                            {item.brand}
+                          </span>
+                          <button 
+                            onClick={() => removeFromCart(item.id, item.size)}
+                            className="text-gray-400 hover:text-[#ff3f6c] transition-colors p-1"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                        <h4 className="text-sm font-bold text-gray-900 dark:text-white truncate mt-0.5">{item.name || item.para}</h4>
+                        <p className="text-xs text-gray-400 mt-1">Size: {item.size || 'M'}</p>
+                      </div>
+                      
+                      <div className="flex justify-between items-center mt-3 pt-2 border-t border-gray-50 dark:border-white/5">
+                        <span className="font-extrabold text-sm text-gray-900 dark:text-white">
+                          Rs. {item.price?.toLocaleString()}
+                        </span>
+                        
+                        {/* Quantity Counter */}
+                        <div className="flex items-center border border-gray-200 dark:border-white/10 rounded-full overflow-hidden">
+                          <button 
+                            onClick={() => updateQuantity(item.id, item.size, item.quantity - 1)}
+                            className="w-7 h-7 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-white/5 text-gray-500"
+                          >
+                            <Minus className="w-3 h-3" />
+                          </button>
+                          <span className="w-7 text-center text-xs font-bold text-gray-900 dark:text-white">{item.quantity}</span>
+                          <button 
+                            onClick={() => updateQuantity(item.id, item.size, item.quantity + 1)}
+                            className="w-7 h-7 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-white/5 text-gray-500"
+                          >
+                            <Plus className="w-3 h-3" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+
+            {/* Pricing Details Panel */}
+            <div className="lg:col-span-5 bg-gray-50 dark:bg-white/5 rounded-3xl p-6 sm:p-8 border border-gray-100 dark:border-white/5 space-y-6">
+              <h4 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">
+                Price Details
+              </h4>
+              
+              <div className="space-y-3.5 text-sm font-semibold text-gray-500 dark:text-gray-400">
+                <div className="flex justify-between">
+                  <span>Subtotal</span>
+                  <span className="font-bold text-gray-900 dark:text-white">Rs. {total.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Shipping</span>
+                  <span className="font-bold text-gray-900 dark:text-white">
+                    {shipping === 0 ? 'Free' : `Rs. ${shipping.toLocaleString()}`}
+                  </span>
+                </div>
+                {promoApplied && (
+                  <div className="flex justify-between text-emerald-500">
+                    <span>Coupon Discount</span>
+                    <span>- Rs. {discount.toLocaleString()}</span>
+                  </div>
+                )}
+                <div className="border-t border-gray-200/50 dark:border-white/5 pt-4 flex justify-between items-baseline">
+                  <span className="text-base text-gray-900 dark:text-white font-extrabold uppercase">Total Amount</span>
+                  <span className="text-2xl font-black text-gray-900 dark:text-white">Rs. {finalPayable.toLocaleString()}</span>
+                </div>
+              </div>
+
+              {/* Promo Coupon Area */}
+              <div className="border-t border-gray-200/50 dark:border-white/5 pt-6 space-y-3">
+                <div className="flex items-center gap-2 text-xs font-bold text-[#ff3f6c] uppercase tracking-wider">
+                  <Gift className="w-4 h-4" /> Apply Coupon (Try: MYNTRA300)
+                </div>
+                <div className="flex gap-3">
+                  <input 
+                    type="text" 
+                    placeholder="Enter Promo Code"
+                    value={promoCode}
+                    onChange={(e) => setPromoCode(e.target.value)}
+                    disabled={promoApplied}
+                    className="flex-1 border border-gray-200 dark:border-white/10 bg-white dark:bg-black rounded-xl px-4 py-3 text-xs outline-none focus:border-[#ff3f6c] font-bold" 
+                  />
+                  <button 
+                    onClick={handleApplyPromo}
+                    disabled={promoApplied}
+                    className="bg-[#ff3f6c] hover:bg-[#e02454] disabled:bg-gray-200 dark:disabled:bg-white/10 text-white rounded-xl px-5 py-3 text-xs font-extrabold uppercase tracking-wider transition-colors"
+                  >
+                    {promoApplied ? 'Applied' : 'Apply'}
                   </button>
                 </div>
               </div>
-            ))}
-          </div>
 
-          {/* Pricing Details Panel */}
-          <div style={{ 
-            flex: '1', 
-            minWidth: '300px', 
-            padding: '25px', 
-            backgroundColor: 'var(--cardBg)',
-            borderRadius: 'var(--borderRadius)',
-            boxShadow: 'var(--shadowLight)',
-            height: 'fit-content',
-            border: 'none'
-          }}>
-            <h4 style={{ 
-              borderBottom: '1px solid var(--borderColor)', 
-              paddingBottom: '12px', 
-              fontSize: '12px', 
-              fontWeight: '700', 
-              color: 'var(--textMuted)', 
-              textTransform: 'uppercase',
-              letterSpacing: '1px',
-              margin: '0 0 20px 0'
-            }}>
-              Price Details ({cartItems.length} Items)
-            </h4>
-            
-            <div style={{ margin: '15px 0', display: 'flex', justifyContent: 'space-between', fontSize: '14px', color: 'var(--primaryColor)', fontWeight: '500' }}>
-              <span>Total MRP</span>
-              <span>Rs. {totalMRP}</span>
-            </div>
+              <button 
+                onClick={handlePlaceOrder}
+                className="w-full bg-[#ff3f6c] hover:bg-[#e02454] text-white py-4.5 rounded-2xl font-extrabold uppercase tracking-wider text-xs shadow-lg shadow-[#ff3f6c]/20 hover:scale-[1.01] transition-all flex items-center justify-center gap-2"
+              >
+                Proceed to Checkout <ArrowRight className="w-4 h-4" />
+              </button>
 
-            <div style={{ margin: '15px 0', display: 'flex', justifyContent: 'space-between', fontSize: '14px', color: 'var(--primaryColor)', fontWeight: '500' }}>
-              <span>Discount on MRP</span>
-              <span style={{ color: 'var(--successColor)' }}>- Rs. {standardDiscount}</span>
-            </div>
-
-            {promoApplied && (
-              <div style={{ margin: '15px 0', display: 'flex', justifyContent: 'space-between', fontSize: '14px', color: 'var(--successColor)', fontWeight: '700' }}>
-                <span>Coupon Discount</span>
-                <span>- Rs. {promoDiscount}</span>
-              </div>
-            )}
-
-            <hr style={{ border: 'none', borderTop: '1px solid var(--borderColor)', margin: '20px 0' }} />
-
-            <div style={{ margin: '20px 0', display: 'flex', justifyContent: 'space-between', fontSize: '16px', fontWeight: '800', color: 'var(--primaryColor)' }}>
-              <span>Total Amount</span>
-              <span>Rs. {finalPayable}</span>
-            </div>
-
-            {/* Promo Code Coupon Area */}
-            <div style={{ 
-              marginTop: '25px', 
-              padding: '15px', 
-              border: '1px dashed var(--accentColor)', 
-              borderRadius: '6px', 
-              background: '#fff6f8' 
-            }}>
-              <p style={{ fontSize: '11px', fontWeight: '800', color: 'var(--accentColor)', margin: '0 0 8px 0', letterSpacing: '0.5px' }}>Apply Coupon (Try: MYNTRA300)</p>
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <input 
-                  type="text" 
-                  placeholder="Enter Promo Code"
-                  value={promoCode}
-                  onChange={(e) => setPromoCode(e.target.value)}
-                  disabled={promoApplied}
-                  style={{ 
-                    flex: '1', 
-                    padding: '8px 12px', 
-                    border: '1px solid var(--borderColor)', 
-                    borderRadius: '4px', 
-                    fontSize: '12px',
-                    outline: 'none',
-                    fontWeight: '600'
-                  }}
-                />
-                <button 
-                  onClick={handleApplyPromo}
-                  disabled={promoApplied}
-                  style={{ 
-                    padding: '8px 15px', 
-                    background: promoApplied ? '#ccc' : 'var(--accentColor)', 
-                    color: '#fff', 
-                    border: 'none', 
-                    borderRadius: '4px', 
-                    fontSize: '11px', 
-                    fontWeight: '800', 
-                    cursor: 'pointer',
-                    transition: 'background-color 0.2s',
-                    letterSpacing: '0.5px'
-                  }}
-                  onMouseEnter={(e) => { if(!promoApplied) e.target.style.backgroundColor = 'var(--accentHover)'; }}
-                  onMouseLeave={(e) => { if(!promoApplied) e.target.style.backgroundColor = 'var(--accentColor)'; }}
-                >
-                  {promoApplied ? 'APPLIED' : 'APPLY'}
-                </button>
+              <div className="flex items-center justify-center gap-2 text-[10px] text-gray-400 uppercase tracking-widest font-extrabold pt-2">
+                <ShieldCheck className="w-4 h-4 text-emerald-500" /> Secure Checkout Assured
               </div>
             </div>
-
-            <button 
-              onClick={handlePlaceOrder}
-              style={{ 
-                width: '100%', 
-                marginTop: '25px', 
-                padding: '12px 0', 
-                background: 'var(--accentColor)', 
-                color: '#fff', 
-                border: 'none', 
-                borderRadius: '4px', 
-                fontSize: '13px', 
-                fontWeight: '800', 
-                cursor: 'pointer', 
-                letterSpacing: '1px',
-                transition: 'background-color 0.2s, box-shadow 0.2s'
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.backgroundColor = 'var(--accentHover)';
-                e.target.style.boxShadow = '0 4px 12px rgba(255, 63, 108, 0.2)';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.backgroundColor = 'var(--accentColor)';
-                e.target.style.boxShadow = 'none';
-              }}
-            >
-              PLACE ORDER
-            </button>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
     </div>
   );
 }
