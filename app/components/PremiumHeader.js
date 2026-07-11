@@ -3,9 +3,10 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, User, Heart, ShoppingBag, Menu, X, ChevronDown, ArrowRight } from "lucide-react";
+import { Search, User, Heart, ShoppingBag, Menu, X, ChevronDown, ArrowRight, Sun, Moon } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useCartStore } from "../store/useCartStore";
+import { useTheme } from "./ThemeProvider";
 
 const navItems = [
   { name: "Men", href: "/menspage" },
@@ -66,7 +67,7 @@ const menuData = {
     sections: [
       { title: "Makeup", items: ["Lipstick", "Mascara", "Foundation", "Eyeliner"] },
       { title: "Skincare", items: ["Face Moisturizer", "Cleanser", "Serum", "Sunscreen"] },
-      { title: "Fragrances", items: ["Perfumes", "Deodorants", "Body Mists"] }
+      { title: "Fragrances", items: ["Fragrances", "Deodorants", "Body Mists"] }
     ]
   },
   "Home & Living": {
@@ -100,6 +101,7 @@ export default function PremiumHeader() {
   const [promoIndex, setPromoIndex] = useState(0);
   const pathname = usePathname();
   const { openCart, cartItems, wishlistItems, hydrateFromLocalStorage } = useCartStore();
+  const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
     setMounted(true);
@@ -107,7 +109,6 @@ export default function PremiumHeader() {
     const handleScroll = () => setIsScrolled(window.scrollY > 30);
     window.addEventListener("scroll", handleScroll);
 
-    // Rotate promo message every 4 seconds
     const promoInterval = setInterval(() => {
       setPromoIndex(prev => (prev + 1) % promoMessages.length);
     }, 4000);
@@ -124,28 +125,22 @@ export default function PremiumHeader() {
   const isLanding = pathname === "/Landingpage" || pathname === "/";
   const isTransparent = !isScrolled && !activeMegaMenu && isLanding;
 
-  // Scroll state: dark glass. Transparent on landing hero. White glass on other pages.
+  // Let the theme dictate colors based on state
   const headerBg = isTransparent
     ? "transparent"
-    : isScrolled || activeMegaMenu
-      ? "rgba(10, 10, 13, 0.92)"
-      : "rgba(255,255,255,0.96)";
+    : "var(--header-scrolled)";
 
   const headerBorderBottom = isTransparent
     ? "1px solid transparent"
-    : isScrolled || activeMegaMenu
-      ? "1px solid rgba(255,255,255,0.06)"
-      : "1px solid rgba(0,0,0,0.07)";
+    : "1px solid var(--header-border)";
 
   const textColor = isTransparent
     ? "white"
-    : isScrolled || activeMegaMenu
-      ? "rgba(255,255,255,0.9)"
-      : "#0f0f12";
+    : "var(--header-text)";
 
-  const iconHoverBg = (isScrolled || activeMegaMenu) && !isTransparent
-    ? "rgba(255,255,255,0.08)"
-    : "rgba(0,0,0,0.05)";
+  const iconHoverBg = isTransparent
+    ? "rgba(255,255,255,0.1)"
+    : "var(--border-light)";
 
   return (
     <>
@@ -167,7 +162,7 @@ export default function PremiumHeader() {
               transition={{ duration: 0.4 }}
               style={{
                 color: "rgba(245,243,239,0.85)", fontSize: "11px", fontWeight: 600,
-                letterSpacing: "1px", fontFamily: "'Plus Jakarta Sans', sans-serif",
+                letterSpacing: "1px", fontFamily: "var(--font-secondary)",
               }}
             >
               {promoMessages[promoIndex]}
@@ -182,11 +177,11 @@ export default function PremiumHeader() {
         left: 0, right: 0,
         zIndex: 100,
         background: headerBg,
-        backdropFilter: (isScrolled || activeMegaMenu) ? "blur(24px)" : "none",
-        WebkitBackdropFilter: (isScrolled || activeMegaMenu) ? "blur(24px)" : "none",
+        backdropFilter: isTransparent ? "none" : "blur(24px)",
+        WebkitBackdropFilter: isTransparent ? "none" : "blur(24px)",
         borderBottom: headerBorderBottom,
         transition: "background 0.4s ease, border-color 0.4s ease, top 0.3s ease",
-        boxShadow: isScrolled ? "0 4px 32px rgba(0,0,0,0.3)" : "none",
+        boxShadow: !isTransparent && isScrolled ? "var(--shadow-md)" : "none",
       }}>
         <div style={{
           maxWidth: "1600px", margin: "0 auto",
@@ -215,19 +210,19 @@ export default function PremiumHeader() {
           }}>
             <div style={{
               width: "36px", height: "36px", borderRadius: "10px",
-              background: "linear-gradient(135deg, #ff3f6c, #e8274b)",
+              background: "var(--accent-gradient)",
               display: "flex", alignItems: "center", justifyContent: "center",
-              boxShadow: "0 4px 20px rgba(255,63,108,0.4)",
+              boxShadow: "var(--accent-glow)",
               transition: "box-shadow 0.3s ease",
             }}
-            onMouseEnter={e => e.currentTarget.style.boxShadow = "0 4px 28px rgba(201,168,76,0.55)"}
-            onMouseLeave={e => e.currentTarget.style.boxShadow = "0 4px 20px rgba(255,63,108,0.4)"}
+            onMouseEnter={e => e.currentTarget.style.boxShadow = "var(--gold-glow)"}
+            onMouseLeave={e => e.currentTarget.style.boxShadow = "var(--accent-glow)"}
             >
-              <span style={{ color: "white", fontWeight: 900, fontSize: "15px", fontFamily: "'Outfit', sans-serif" }}>A.</span>
+              <span style={{ color: "white", fontWeight: 900, fontSize: "15px", fontFamily: "var(--font-primary)" }}>A.</span>
             </div>
             <span style={{
               fontSize: "21px", fontWeight: 900, color: textColor,
-              fontFamily: "'Outfit', sans-serif", letterSpacing: "-0.5px",
+              fontFamily: "var(--font-primary)", letterSpacing: "-0.5px",
               transition: "color 0.4s ease",
             }}>Aura</span>
           </Link>
@@ -252,19 +247,19 @@ export default function PremiumHeader() {
                     position: "relative",
                     display: "flex", alignItems: "center", gap: "5px",
                     padding: "8px 13px",
-                    color: (isActive || isMenuActive) ? "#ff3f6c" : textColor,
+                    color: (isActive || isMenuActive) ? "var(--accent)" : textColor,
                     fontSize: "12.5px", fontWeight: 700,
                     textTransform: "uppercase", letterSpacing: "0.8px",
                     textDecoration: "none",
                     transition: "color 0.25s ease",
                     borderRadius: "8px",
-                    fontFamily: "'Plus Jakarta Sans', sans-serif",
+                    fontFamily: "var(--font-secondary)",
                   }}>
                     {item.name}
                     {item.isNew && (
                       <span style={{
                         fontSize: "7px", fontWeight: 900,
-                        background: "#ff3f6c", color: "white",
+                        background: "var(--accent)", color: "white",
                         padding: "2px 5px", borderRadius: "4px",
                         letterSpacing: "0.5px",
                       }}>NEW</span>
@@ -272,7 +267,7 @@ export default function PremiumHeader() {
                     {/* Active underline */}
                     <span style={{
                       position: "absolute", bottom: "4px", left: "13px", right: "13px",
-                      height: "2px", background: "#ff3f6c", borderRadius: "999px",
+                      height: "2px", background: "var(--accent)", borderRadius: "999px",
                       transform: isActive ? "scaleX(1)" : "scaleX(0)",
                       transition: "transform 0.3s ease",
                       transformOrigin: "center",
@@ -284,21 +279,39 @@ export default function PremiumHeader() {
           </nav>
 
           {/* Right action icons */}
-          <div style={{ display: "flex", alignItems: "center", gap: "4px", flexShrink: 0 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
+            {/* Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              className={`theme-toggle ${theme === "dark" ? "dark" : ""}`}
+              style={{
+                background: theme === "dark" ? "#1e1e24" : "#e2ddd5",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "0 6px",
+              }}
+              title={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            >
+              <Sun size={12} color={theme === "dark" ? "#8a8a99" : "#B8922A"} />
+              <Moon size={12} color={theme === "dark" ? "#C9A84C" : "#8a8a99"} />
+              <div className="theme-toggle-thumb" />
+            </button>
+
             {/* Search */}
             <button
               onClick={() => setSearchOpen(!searchOpen)}
               style={{
                 display: "flex", alignItems: "center", justifyContent: "center",
                 width: "40px", height: "40px",
-                background: searchOpen ? "rgba(255,63,108,0.12)" : "none",
+                background: searchOpen ? "var(--accent-light)" : "none",
                 border: "none", cursor: "pointer",
-                color: searchOpen ? "#ff3f6c" : textColor,
+                color: searchOpen ? "var(--accent)" : textColor,
                 borderRadius: "10px",
                 transition: "background 0.2s, color 0.3s",
               }}
-              onMouseEnter={e => { e.currentTarget.style.color = "#ff3f6c"; e.currentTarget.style.background = iconHoverBg; }}
-              onMouseLeave={e => { e.currentTarget.style.color = searchOpen ? "#ff3f6c" : textColor; e.currentTarget.style.background = searchOpen ? "rgba(255,63,108,0.12)" : "none"; }}
+              onMouseEnter={e => { e.currentTarget.style.color = "var(--accent)"; e.currentTarget.style.background = iconHoverBg; }}
+              onMouseLeave={e => { e.currentTarget.style.color = searchOpen ? "var(--accent)" : textColor; e.currentTarget.style.background = searchOpen ? "var(--accent-light)" : "none"; }}
             >
               <Search size={19} />
             </button>
@@ -309,7 +322,7 @@ export default function PremiumHeader() {
               color: textColor, borderRadius: "10px",
               transition: "color 0.2s, background 0.2s", textDecoration: "none",
             }}
-            onMouseEnter={e => { e.currentTarget.style.color = "#ff3f6c"; e.currentTarget.style.background = iconHoverBg; }}
+            onMouseEnter={e => { e.currentTarget.style.color = "var(--accent)"; e.currentTarget.style.background = iconHoverBg; }}
             onMouseLeave={e => { e.currentTarget.style.color = textColor; e.currentTarget.style.background = "none"; }}
             >
               <User size={19} />
@@ -322,7 +335,7 @@ export default function PremiumHeader() {
               color: textColor, borderRadius: "10px",
               transition: "color 0.2s, background 0.2s, transform 0.25s", textDecoration: "none",
             }}
-            onMouseEnter={e => { e.currentTarget.style.color = "#ff3f6c"; e.currentTarget.style.background = iconHoverBg; e.currentTarget.style.transform = "scale(1.1)"; }}
+            onMouseEnter={e => { e.currentTarget.style.color = "var(--accent)"; e.currentTarget.style.background = iconHoverBg; e.currentTarget.style.transform = "scale(1.1)"; }}
             onMouseLeave={e => { e.currentTarget.style.color = textColor; e.currentTarget.style.background = "none"; e.currentTarget.style.transform = "scale(1)"; }}
             >
               <Heart size={19} />
@@ -330,7 +343,7 @@ export default function PremiumHeader() {
                 <span style={{
                   position: "absolute", top: "5px", right: "5px",
                   width: "15px", height: "15px",
-                  background: "#ff3f6c", color: "white",
+                  background: "var(--accent)", color: "white",
                   borderRadius: "50%", fontSize: "8px", fontWeight: 900,
                   display: "flex", alignItems: "center", justifyContent: "center",
                   boxShadow: "0 0 8px rgba(255,63,108,0.6)",
@@ -350,7 +363,7 @@ export default function PremiumHeader() {
                 color: textColor, borderRadius: "10px",
                 transition: "color 0.2s, background 0.2s",
               }}
-              onMouseEnter={e => { e.currentTarget.style.color = "#ff3f6c"; e.currentTarget.style.background = iconHoverBg; }}
+              onMouseEnter={e => { e.currentTarget.style.color = "var(--accent)"; e.currentTarget.style.background = iconHoverBg; }}
               onMouseLeave={e => { e.currentTarget.style.color = textColor; e.currentTarget.style.background = "none"; }}
             >
               <ShoppingBag size={19} />
@@ -358,7 +371,7 @@ export default function PremiumHeader() {
                 <span style={{
                   position: "absolute", top: "5px", right: "5px",
                   width: "15px", height: "15px",
-                  background: "#ff3f6c", color: "white",
+                  background: "var(--accent)", color: "white",
                   borderRadius: "50%", fontSize: "8px", fontWeight: 900,
                   display: "flex", alignItems: "center", justifyContent: "center",
                   boxShadow: "0 0 8px rgba(255,63,108,0.6)",
@@ -380,9 +393,9 @@ export default function PremiumHeader() {
               transition={{ duration: 0.2 }}
               style={{
                 position: "absolute", left: 0, right: 0,
-                background: "rgba(255,255,255,0.98)", backdropFilter: "blur(24px)",
-                borderBottom: "1px solid rgba(0,0,0,0.06)",
-                boxShadow: "0 28px 60px rgba(0,0,0,0.1)",
+                background: "var(--mega-bg)", backdropFilter: "blur(24px)",
+                borderBottom: "1px solid var(--border-color)",
+                boxShadow: "var(--shadow-lg)",
                 zIndex: 99,
               }}
               onMouseEnter={() => setActiveMegaMenu(activeMegaMenu)}
@@ -397,11 +410,11 @@ export default function PremiumHeader() {
                 {menuData[activeMegaMenu].sections.map((section) => (
                   <div key={section.title}>
                     <h4 style={{
-                      fontSize: "10px", fontWeight: 900, color: "#9a9a9a",
+                      fontSize: "10px", fontWeight: 900, color: "var(--text-muted)",
                       textTransform: "uppercase", letterSpacing: "2.5px",
                       marginBottom: "16px", paddingBottom: "12px",
-                      borderBottom: "1px solid #f0ede8",
-                      fontFamily: "'Plus Jakarta Sans', sans-serif",
+                      borderBottom: "1px solid var(--border-color)",
+                      fontFamily: "var(--font-secondary)",
                     }}>
                       {section.title}
                     </h4>
@@ -410,13 +423,13 @@ export default function PremiumHeader() {
                         <li key={item}>
                           <Link href={`${menuData[activeMegaMenu].href}?q=${encodeURIComponent(item)}`}
                             style={{
-                              fontSize: "14px", color: "#4a4a5a",
+                              fontSize: "14px", color: "var(--text-secondary)",
                               textDecoration: "none", transition: "color 0.2s",
-                              fontFamily: "'Plus Jakarta Sans', sans-serif",
+                              fontFamily: "var(--font-secondary)",
                               fontWeight: 500,
                             }}
-                            onMouseEnter={e => e.currentTarget.style.color = "#ff3f6c"}
-                            onMouseLeave={e => e.currentTarget.style.color = "#4a4a5a"}
+                            onMouseEnter={e => e.currentTarget.style.color = "var(--accent)"}
+                            onMouseLeave={e => e.currentTarget.style.color = "var(--text-secondary)"}
                           >
                             {item}
                           </Link>
@@ -432,6 +445,7 @@ export default function PremiumHeader() {
                     <img
                       src={menuData[activeMegaMenu].featured.image}
                       alt={menuData[activeMegaMenu].featured.title}
+                      loading="lazy"
                       style={{ width: "100%", height: "100%", objectFit: "cover" }}
                     />
                     <div style={{
@@ -440,20 +454,20 @@ export default function PremiumHeader() {
                     }} />
                     <div style={{ position: "absolute", bottom: "12px", left: "12px" }}>
                       <span style={{
-                        fontSize: "8px", fontWeight: 900, background: "#C9A84C",
+                        fontSize: "8px", fontWeight: 900, background: "var(--gold-gradient)",
                         color: "#3a2a00", padding: "2px 8px", borderRadius: "4px",
                         textTransform: "uppercase", letterSpacing: "1px",
                       }}>Featured</span>
                     </div>
                   </div>
-                  <h4 style={{ fontWeight: 800, color: "#0f0f12", marginTop: "12px", fontSize: "15px", fontFamily: "'Outfit', sans-serif" }}>
+                  <h4 style={{ fontWeight: 800, color: "var(--text-primary)", marginTop: "12px", fontSize: "15px", fontFamily: "var(--font-primary)" }}>
                     {menuData[activeMegaMenu].featured.title}
                   </h4>
                   <Link href={menuData[activeMegaMenu].featured.link} style={{
                     display: "inline-flex", alignItems: "center", gap: "5px",
-                    marginTop: "8px", fontSize: "12px", color: "#ff3f6c",
+                    marginTop: "8px", fontSize: "12px", color: "var(--accent)",
                     fontWeight: 800, textDecoration: "none",
-                    fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: "0.5px",
+                    fontFamily: "var(--font-secondary)", letterSpacing: "0.5px",
                   }}>
                     Shop Now <ArrowRight size={13} />
                   </Link>
@@ -473,19 +487,19 @@ export default function PremiumHeader() {
               transition={{ duration: 0.2 }}
               style={{
                 position: "absolute", left: 0, right: 0,
-                background: "rgba(255,255,255,0.98)", backdropFilter: "blur(24px)",
-                borderBottom: "1px solid rgba(0,0,0,0.06)",
+                background: "var(--mega-bg)", backdropFilter: "blur(24px)",
+                borderBottom: "1px solid var(--border-color)",
                 padding: "22px 5vw",
-                boxShadow: "0 24px 60px rgba(0,0,0,0.1)",
+                boxShadow: "var(--shadow-md)",
               }}
             >
               <div style={{
                 maxWidth: "640px", margin: "0 auto",
                 display: "flex", alignItems: "center", gap: "12px",
-                background: "#F8F5F0", borderRadius: "14px", padding: "13px 20px",
-                border: "1px solid rgba(0,0,0,0.07)",
+                background: "var(--bg-secondary)", borderRadius: "14px", padding: "13px 20px",
+                border: "1px solid var(--border-color)",
               }}>
-                <Search size={17} color="#9a9a9a" />
+                <Search size={17} color="var(--text-muted)" />
                 <input
                   autoFocus
                   placeholder="Search clothes, brands, styles..."
@@ -493,7 +507,7 @@ export default function PremiumHeader() {
                   onChange={e => setSearchQuery(e.target.value)}
                   style={{
                     flex: 1, background: "none", border: "none", outline: "none",
-                    fontSize: "14px", color: "#0f0f12", fontFamily: "'Plus Jakarta Sans', sans-serif",
+                    fontSize: "14px", color: "var(--text-primary)", fontFamily: "var(--font-secondary)",
                     fontWeight: 500,
                   }}
                   onKeyDown={e => {
@@ -502,7 +516,7 @@ export default function PremiumHeader() {
                     }
                   }}
                 />
-                <button onClick={() => setSearchOpen(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "#9a9a9a" }}>
+                <button onClick={() => setSearchOpen(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)" }}>
                   <X size={17} />
                 </button>
               </div>
@@ -533,25 +547,25 @@ export default function PremiumHeader() {
               style={{
                 position: "fixed", top: 0, left: 0, bottom: 0,
                 width: "min(80vw, 320px)", zIndex: 201,
-                background: "#0c0c0f", overflowY: "auto",
-                boxShadow: "8px 0 60px rgba(0,0,0,0.5)",
+                background: "var(--bg-primary)", overflowY: "auto",
+                boxShadow: "var(--shadow-xl)",
               }}
             >
               <div style={{
                 display: "flex", alignItems: "center", justifyContent: "space-between",
-                padding: "22px 20px", borderBottom: "1px solid rgba(255,255,255,0.06)",
+                padding: "22px 20px", borderBottom: "1px solid var(--border-color)",
               }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                   <div style={{
                     width: "34px", height: "34px", borderRadius: "8px",
-                    background: "linear-gradient(135deg, #ff3f6c, #e8274b)",
+                    background: "var(--accent-gradient)",
                     display: "flex", alignItems: "center", justifyContent: "center",
                   }}>
-                    <span style={{ color: "white", fontWeight: 900, fontSize: "14px", fontFamily: "'Outfit', sans-serif" }}>A.</span>
+                    <span style={{ color: "white", fontWeight: 900, fontSize: "14px", fontFamily: "var(--font-primary)" }}>A.</span>
                   </div>
-                  <span style={{ fontWeight: 900, fontSize: "18px", color: "#f5f3ef", fontFamily: "'Outfit', sans-serif" }}>Aura</span>
+                  <span style={{ fontWeight: 900, fontSize: "18px", color: "var(--text-primary)", fontFamily: "var(--font-primary)" }}>Aura</span>
                 </div>
-                <button onClick={() => setMobileMenuOpen(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "#6a6a7a" }}>
+                <button onClick={() => setMobileMenuOpen(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)" }}>
                   <X size={22} />
                 </button>
               </div>
@@ -561,20 +575,20 @@ export default function PremiumHeader() {
                     style={{
                       display: "flex", alignItems: "center", justifyContent: "space-between",
                       padding: "14px 14px", borderRadius: "12px",
-                      color: "#f5f3ef", textDecoration: "none",
+                      color: "var(--text-primary)", textDecoration: "none",
                       fontWeight: 700, fontSize: "15px",
-                      borderBottom: "1px solid rgba(255,255,255,0.04)",
-                      fontFamily: "'Plus Jakarta Sans', sans-serif",
+                      borderBottom: "1px solid var(--border-light)",
+                      fontFamily: "var(--font-secondary)",
                       transition: "background 0.2s",
                     }}
-                    onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.04)"}
+                    onMouseEnter={e => e.currentTarget.style.background = "var(--border-light)"}
                     onMouseLeave={e => e.currentTarget.style.background = "none"}
                   >
                     <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                       {item.name}
-                      {item.isNew && <span style={{ fontSize: "8px", fontWeight: 900, background: "#ff3f6c", color: "white", padding: "2px 5px", borderRadius: "4px" }}>NEW</span>}
+                      {item.isNew && <span style={{ fontSize: "8px", fontWeight: 900, background: "var(--accent)", color: "white", padding: "2px 5px", borderRadius: "4px" }}>NEW</span>}
                     </span>
-                    <ChevronDown size={15} color="#6a6a7a" style={{ transform: "rotate(-90deg)" }} />
+                    <ChevronDown size={15} color="var(--text-muted)" style={{ transform: "rotate(-90deg)" }} />
                   </Link>
                 ))}
               </nav>
@@ -582,7 +596,7 @@ export default function PremiumHeader() {
               <div style={{
                 position: "absolute", bottom: 0, left: 0, right: 0,
                 height: "3px",
-                background: "linear-gradient(90deg, transparent, #C9A84C 50%, transparent)",
+                background: "var(--gold-gradient)",
               }} />
             </motion.div>
           </>
